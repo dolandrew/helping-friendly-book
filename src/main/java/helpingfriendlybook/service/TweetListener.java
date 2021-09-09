@@ -43,6 +43,8 @@ public class TweetListener {
     @Scheduled(initialDelay = 0, fixedDelay = 5000)
     public void listenToPhishFTR() {
         LOG.info("Checking for tweets...");
+        LOG.info("using bearer token: " + bearerToken);
+        LOG.info("using id: " + phishCompanionId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + bearerToken);
