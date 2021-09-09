@@ -31,13 +31,13 @@ public class TweetListener {
 
     private String currentSongName;
 
-    @Value("twitter.bearerToken")
+    @Value("${twitter.bearerToken}")
     private String bearerToken;
 
-    @Value("twitter.phish.ftr.id")
+    @Value("${twitter.phish.ftr.id}")
     private String phishFTRid;
 
-    @Value("twitter.phish.companion.id")
+    @Value("${twitter.phish.companion.id}")
     private String phishCompanionId;
 
     @Scheduled(initialDelay = 0, fixedDelay = 5000)
