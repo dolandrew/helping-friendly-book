@@ -43,7 +43,7 @@ public class TweetListener {
         this.metadataAssembler = metadataAssembler;
     }
 
-    @Scheduled(initialDelay = 0, fixedDelay = 5000)
+    @Scheduled(initialDelay = 0, fixedDelay = 60000 * 20)
     public void listenToPhishFTR() {
         LOG.info("Checking for tweets...");
 
