@@ -62,8 +62,8 @@ public class Tweeter {
         String tweet = songDTO.getName() +
                 " has been played " + songDTO.getTimes() + " times," +
                 " Last played " + songDTO.getLastPlayed() + "," +
-                " Show gap: " + songDTO.getGap() +
-                " First played on: " + songDTO.getDebut();
+                " Show gap - " + songDTO.getGap() +
+                " First played on - " + songDTO.getDebut();
 
         HttpPost httpPost = new HttpPost(
                 "https://api.twitter.com/1.1/statuses/update.json?status=" + tweet);

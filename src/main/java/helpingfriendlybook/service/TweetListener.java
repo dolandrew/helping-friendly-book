@@ -49,7 +49,7 @@ public class TweetListener {
         this.tweeter = tweeter;
     }
 
-    @Scheduled(initialDelay = 0, fixedDelay = 60000 * 20)
+    @Scheduled(initialDelay = 0, fixedDelay = 60000 * 1)
     public void listenToPhishFTR() throws OAuthExpectationFailedException, OAuthCommunicationException, OAuthMessageSignerException, IOException {
         LOG.info("Checking for tweets...");
 
