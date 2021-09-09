@@ -14,8 +14,11 @@ public class MetadataAssembler {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataAssembler.class);
 
-    @Autowired
-    private SongLoader songLoader;
+    private final SongLoader songLoader;
+
+    public MetadataAssembler(SongLoader songLoader) {
+        this.songLoader = songLoader;
+    }
 
     public SongDTO assembleMetadata(String songName) {
         LOG.info("Assembling metadata for: " + songName);

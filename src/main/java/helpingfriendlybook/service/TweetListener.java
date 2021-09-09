@@ -23,11 +23,9 @@ public class TweetListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(TweetListener.class);
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    @Autowired
-    private MetadataAssembler metadataAssembler;
+    private final MetadataAssembler metadataAssembler;
 
     private String currentSongName;
 
@@ -39,6 +37,11 @@ public class TweetListener {
 
     @Value("${twitter.phish.companion.id}")
     private String phishCompanionId;
+
+    public TweetListener(RestTemplate restTemplate, MetadataAssembler metadataAssembler) {
+        this.restTemplate = restTemplate;
+        this.metadataAssembler = metadataAssembler;
+    }
 
     @Scheduled(initialDelay = 0, fixedDelay = 5000)
     public void listenToPhishFTR() {

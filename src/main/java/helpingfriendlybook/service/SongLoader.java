@@ -19,10 +19,13 @@ public class SongLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataAssembler.class);
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     private String PHISH_NET_URL = "https://www.phish.net";
+
+    public SongLoader(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public List<SongDTO> getSongs() {
         LOG.info("Fetching songs...");

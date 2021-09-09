@@ -17,8 +17,6 @@ public class SongDTO {
 
     private Integer gap;
 
-    private Set<String> lyricSnippets = new HashSet<>();
-
     private String nameLower;
 
     private Integer times;
@@ -69,14 +67,6 @@ public class SongDTO {
 
     public void setLink(String link) {
         this.link = link;
-    }
-
-    public Set<String> getLyricSnippets() {
-        return lyricSnippets;
-    }
-
-    public void setLyricSnippets(Set<String> lyricSnippets) {
-        this.lyricSnippets = lyricSnippets;
     }
 
     public void setNameLower(String nameLower) {
