@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 
 import oauth.signpost.OAuthConsumer;
@@ -65,8 +67,10 @@ public class Tweeter {
                 " Show gap - " + songDTO.getGap() +
                 " First played on - " + songDTO.getDebut();
 
+        String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
+
         HttpPost httpPost = new HttpPost(
-                "https://api.twitter.com/1.1/statuses/update.json?status=" + tweet);
+                "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet);
 
         oAuthConsumer.sign(httpPost);
 
