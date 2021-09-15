@@ -6,8 +6,6 @@ import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -17,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -56,11 +53,11 @@ public class Tweeter {
             if (songDTO.getGap() > 20) {
                 tweet = "BUSTOUT: ";
             }
-            tweet += songDTO.getName() +
-                    " has been played " + songDTO.getTimes() + " times," +
-                    " Last played " + songDTO.getLastPlayed() + "," +
-                    " Show gap: " + songDTO.getGap() + "," +
-                    " First played on: " + songDTO.getDebut();
+            tweet += songDTO.getName() + " has been played " + songDTO.getTimes() + " times" +
+                    "\nLast played: " + songDTO.getLastPlayed() +
+                    "\nShow gap: " + songDTO.getGap() +
+                    "\nFirst played on: " + songDTO.getDebut() +
+                    "\n" + songDTO.getLink();
         }
 
         String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());

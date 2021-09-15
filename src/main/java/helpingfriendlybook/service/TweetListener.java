@@ -52,17 +52,21 @@ public class TweetListener {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + bearerToken);
-        ResponseEntity<LinkedHashMap> responseEntity = restTemplate.exchange("https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5", HttpMethod.GET, new HttpEntity<>(headers), LinkedHashMap.class);
+        ResponseEntity<LinkedHashMap> responseEntity = restTemplate.exchange("https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=1", HttpMethod.GET, new HttpEntity<>(headers), LinkedHashMap.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
             LinkedHashMap body = responseEntity.getBody();
             if (body != null) {
                 Object data = body.get("data");
                 if (data != null) {
                     String fetchedSongName = (String) ((LinkedHashMap) ((List) data).get(0)).get("text");
-                    if (fetchedSongName != null && (currentSongName == null || !fetchedSongName.equals(currentSongName))) {
-                        LOG.warn("Found new song: " + fetchedSongName);
-                        currentSongName = fetchedSongName;
-                        SongDTO songDTO = metadataAssembler.assembleMetadata(fetchedSongName);
+                    if (shouldIgnoreTweet(fetchedSongName)) {
+                        return;
+                    }
+                    if (!shouldIgnoreTweet(fetchedSongName) && !fetchedSongName.equals(currentSongName)) {
+                        String cleanedSongName = cleanSongName(fetchedSongName);
+                        LOG.warn("Found new song: " + cleanedSongName);
+                        currentSongName = cleanedSongName;
+                        SongDTO songDTO = metadataAssembler.assembleMetadata(cleanedSongName);
                         tweeter.tweet(songDTO);
                     } else {
                         LOG.warn("Found no new songs.");
@@ -73,7 +77,28 @@ public class TweetListener {
             }
         } else {
             LOG.error("Unable to fetch tweets.");
-            throw new RuntimeException();
         }
+    }
+
+    private boolean shouldIgnoreTweet(String fetchedSongName) {
+        if (fetchedSongName == null
+                ||fetchedSongName.contains("\uD83D\uDCF8")
+                || fetchedSongName.contains("@rene_huemer")
+                || fetchedSongName.contains("https://t.co")
+                || fetchedSongName.matches(".*[0-9]+/[0-9]+/[0-9]{4}.*")
+        ) {
+            LOG.warn("Skipping tweet: " + fetchedSongName);
+            return true;
+        }
+        return false;
+    }
+
+    private String cleanSongName(String fetchedSongName) {
+        return fetchedSongName
+                .replaceAll("&gt; ", "")
+                .replaceAll("&gt;&gt; ", "")
+                .replaceAll("SET ONE: ", "")
+                .replaceAll("SET TWO: ", "")
+                .replaceAll("ENCORE: ", "");
     }
 }
