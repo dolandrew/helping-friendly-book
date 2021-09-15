@@ -44,7 +44,6 @@ public class Tweeter {
     private Environment environment;
 
     public void tweet(SongDTO songDTO) throws OAuthCommunicationException, OAuthExpectationFailedException, OAuthMessageSignerException, IOException {
-        LOG.info("Tweeting...");
 
         OAuthConsumer oAuthConsumer = new CommonsHttpOAuthConsumer(apiKey,
                 apiKeySecret);
@@ -63,7 +62,6 @@ public class Tweeter {
                     " Show gap: " + songDTO.getGap() + "," +
                     " First played on: " + songDTO.getDebut();
         }
-        LOG.info(tweet);
 
         String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
 
@@ -72,15 +70,14 @@ public class Tweeter {
 
         oAuthConsumer.sign(httpPost);
 
+        LOG.warn("Created tweet: \"" + tweet + "\"");
+
         HttpClient httpClient = new DefaultHttpClient();
         if (environment.getActiveProfiles().length > 0  && environment.getActiveProfiles()[0].equals("local")) {
             return;
         }
-        HttpResponse httpResponse = httpClient.execute(httpPost);
-
-        int statusCode = httpResponse.getStatusLine().getStatusCode();
-        System.out.println(statusCode + ':'
-                + httpResponse.getStatusLine().getReasonPhrase());
-        System.out.println(IOUtils.toString(httpResponse.getEntity().getContent()));
+        LOG.warn("Tweeting...");
+        httpClient.execute(httpPost);
+        LOG.warn("Successfully posted tweet.");
     }
 }

@@ -7,11 +7,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +26,8 @@ public class SongLoader {
         this.restTemplate = restTemplate;
     }
 
-    @PostConstruct
     public List<SongDTO> getSongs() {
-        LOG.info("Fetching songs...");
+        LOG.warn("Fetching metadata...");
         String response = restTemplate.getForObject(PHISH_NET_URL + "/song", String.class);
         Document doc = Jsoup.parse(response);
         Elements rows = doc.getElementsByTag("tr");
@@ -46,11 +43,11 @@ public class SongLoader {
                 songDTO.setNameLower(songName.toLowerCase());
 
                 if (cells.get(2).wholeText().contains("Found in Discography")) {
-                    LOG.warn(songName + "has never been played. It is only found in discography.");
+                    LOG.info(songName + "has never been played. It is only found in discography.");
                     continue;
                 }
                 if (cells.get(2).wholeText().contains("Alias of")) {
-                    LOG.warn(songName + " is an alias.");
+                    LOG.info(songName + " is an alias.");
                     //TODO handle alias
                     continue;
                 }
@@ -66,7 +63,7 @@ public class SongLoader {
                 throw e;
             }
         }
-        LOG.info("Successfully fetched songs.");
+        LOG.warn("Successfully fetched songs.");
         return songs;
     }
 }

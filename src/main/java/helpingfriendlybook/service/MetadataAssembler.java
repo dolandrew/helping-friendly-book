@@ -21,7 +21,7 @@ public class MetadataAssembler {
     }
 
     public SongDTO assembleMetadata(String songName) {
-        LOG.info("Assembling metadata for: " + songName);
+        LOG.warn("Assembling metadata for: " + songName);
         SongDTO songDTO = new SongDTO();
         songDTO.setName(songName);
         List<SongDTO> currentSongDTOList = songLoader.getSongs().stream()
@@ -36,7 +36,7 @@ public class MetadataAssembler {
             songDTO.setTimes(fetchedSong.getTimes());
             songDTO.setDebut(fetchedSong.getDebut());
         }
-        LOG.info("Successfully assembled metadata.");
+        LOG.warn("Successfully assembled metadata.");
         return songDTO;
     }
 }

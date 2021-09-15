@@ -48,7 +48,7 @@ public class TweetListener {
 
     @Scheduled(initialDelay = 0, fixedDelay = 60000 * 1)
     public void listenToPhishFTR() throws OAuthExpectationFailedException, OAuthCommunicationException, OAuthMessageSignerException, IOException {
-        LOG.info("Checking for tweets...");
+        LOG.warn("Checking for tweets...");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + bearerToken);
@@ -60,15 +60,15 @@ public class TweetListener {
                 if (data != null) {
                     String fetchedSongName = (String) ((LinkedHashMap) ((List) data).get(0)).get("text");
                     if (fetchedSongName != null && (currentSongName == null || !fetchedSongName.equals(currentSongName))) {
-                        LOG.info("Found new song.");
+                        LOG.warn("Found new song: " + fetchedSongName);
                         currentSongName = fetchedSongName;
                         SongDTO songDTO = metadataAssembler.assembleMetadata(fetchedSongName);
                         tweeter.tweet(songDTO);
                     } else {
-                        LOG.info("Found no new songs.");
+                        LOG.warn("Found no new songs.");
                     }
                 } else {
-                    LOG.info("Found no tweets.");
+                    LOG.error("Found no tweets!");
                 }
             }
         } else {
