@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.dolandrew</groupId>
     <artifactId>helpingfriendlybook</artifactId>
-    <version>0.0.1</version>
+    <version>1.0.0</version>
     <name>Helping Friendly Book</name>
-    <description>API to search for songs with lyrics containing a word</description>
+    <description>Twitter Bot for tweeting metadata about Live Phish. Powered by phish.net and @Phish_FTR.</description>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
