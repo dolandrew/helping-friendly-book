@@ -1,42 +1,32 @@
 package helpingfriendlybook.service;
 
 import helpingfriendlybook.dto.SongDTO;
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
-
-import oauth.signpost.OAuthConsumer;
-import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import javax.annotation.PostConstruct;
 
 @Service
 public class Tweeter {
 
     private static final Logger LOG = LoggerFactory.getLogger(Tweeter.class);
-
-    private final RestTemplate restTemplate;
 
     @Value("${twitter.api.key}")
     private String apiKey;
@@ -50,22 +40,30 @@ public class Tweeter {
     @Value("${twitter.access.token.secret}")
     private String accessTokenSecret;
 
-    public Tweeter(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
+    @Autowired
+    private Environment environment;
 
-    public void tweet(SongDTO songDTO) throws IOException, OAuthCommunicationException, OAuthExpectationFailedException, OAuthMessageSignerException {
+    public void tweet(SongDTO songDTO) throws OAuthCommunicationException, OAuthExpectationFailedException, OAuthMessageSignerException, IOException {
         LOG.info("Tweeting...");
 
         OAuthConsumer oAuthConsumer = new CommonsHttpOAuthConsumer(apiKey,
                 apiKeySecret);
         oAuthConsumer.setTokenWithSecret(accessToken, accessTokenSecret);
 
-        String tweet = songDTO.getName() +
-                " has been played " + songDTO.getTimes() + " times," +
-                " Last played " + songDTO.getLastPlayed() + "," +
-                " Show gap - " + songDTO.getGap() +
-                " First played on - " + songDTO.getDebut();
+        String tweet = "";
+        if (songDTO.getTimes() == 0) {
+            tweet = "DEBUT: " + songDTO.getName();
+        } else {
+            if (songDTO.getGap() > 20) {
+                tweet = "BUSTOUT: ";
+            }
+            tweet += songDTO.getName() +
+                    " has been played " + songDTO.getTimes() + " times," +
+                    " Last played " + songDTO.getLastPlayed() + "," +
+                    " Show gap: " + songDTO.getGap() + "," +
+                    " First played on: " + songDTO.getDebut();
+        }
+        LOG.info(tweet);
 
         String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
 
@@ -75,6 +73,9 @@ public class Tweeter {
         oAuthConsumer.sign(httpPost);
 
         HttpClient httpClient = new DefaultHttpClient();
+        if (environment.getActiveProfiles().length > 0  && environment.getActiveProfiles()[0].equals("local")) {
+            return;
+        }
         HttpResponse httpResponse = httpClient.execute(httpPost);
 
         int statusCode = httpResponse.getStatusLine().getStatusCode();

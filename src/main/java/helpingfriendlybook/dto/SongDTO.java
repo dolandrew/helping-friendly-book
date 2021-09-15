@@ -19,7 +19,7 @@ public class SongDTO {
 
     private String nameLower;
 
-    private Integer times;
+    private int times;
 
     public String getDebut() {
         return debut;
@@ -41,7 +41,7 @@ public class SongDTO {
         return nameLower;
     }
 
-    public Integer getTimes() {
+    public int getTimes() {
         return times;
     }
 
@@ -73,7 +73,7 @@ public class SongDTO {
         this.nameLower = nameLower;
     }
 
-    public void setTimes(Integer times) {
+    public void setTimes(int times) {
         this.times = times;
     }
 }

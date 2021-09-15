@@ -28,11 +28,13 @@ public class MetadataAssembler {
                 .filter(song -> song.getNameLower().contains(songName.toLowerCase()))
                 .collect(Collectors.toList());
         if (!currentSongDTOList.isEmpty()) {
-            songDTO.setGap(currentSongDTOList.get(0).getGap());
-            songDTO.setLastPlayed(currentSongDTOList.get(0).getLastPlayed());
-            songDTO.setLink(currentSongDTOList.get(0).getLink());
-            songDTO.setTimes(currentSongDTOList.get(0).getTimes());
-            songDTO.setDebut(currentSongDTOList.get(0).getDebut());
+            SongDTO fetchedSong = currentSongDTOList.get(0);
+            songDTO.setName(fetchedSong.getName());
+            songDTO.setGap(fetchedSong.getGap());
+            songDTO.setLastPlayed(fetchedSong.getLastPlayed());
+            songDTO.setLink(fetchedSong.getLink());
+            songDTO.setTimes(fetchedSong.getTimes());
+            songDTO.setDebut(fetchedSong.getDebut());
         }
         LOG.info("Successfully assembled metadata.");
         return songDTO;

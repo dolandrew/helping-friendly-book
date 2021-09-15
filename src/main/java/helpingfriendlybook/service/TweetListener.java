@@ -40,9 +40,6 @@ public class TweetListener {
     @Value("${twitter.phish.ftr.id}")
     private String phishFTRid;
 
-    @Value("${twitter.phish.companion.id}")
-    private String phishCompanionId;
-
     public TweetListener(RestTemplate restTemplate, MetadataAssembler metadataAssembler, Tweeter tweeter) {
         this.restTemplate = restTemplate;
         this.metadataAssembler = metadataAssembler;
@@ -55,7 +52,7 @@ public class TweetListener {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + bearerToken);
-        ResponseEntity<LinkedHashMap> responseEntity = restTemplate.exchange("https://api.twitter.com/2/users/" + phishCompanionId + " /tweets?max_results=5", HttpMethod.GET, new HttpEntity<>(headers), LinkedHashMap.class);
+        ResponseEntity<LinkedHashMap> responseEntity = restTemplate.exchange("https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5", HttpMethod.GET, new HttpEntity<>(headers), LinkedHashMap.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
             LinkedHashMap body = responseEntity.getBody();
             if (body != null) {
@@ -67,12 +64,6 @@ public class TweetListener {
                         currentSongName = fetchedSongName;
                         SongDTO songDTO = metadataAssembler.assembleMetadata(fetchedSongName);
                         tweeter.tweet(songDTO);
-                        LOG.info(songDTO.getName());
-                        LOG.info(songDTO.getTimes().toString());
-                        LOG.info(songDTO.getDebut());
-                        LOG.info(songDTO.getLastPlayed());
-                        LOG.info(songDTO.getGap().toString());
-                        LOG.info(songDTO.getLink());
                     } else {
                         LOG.info("Found no new songs.");
                     }
