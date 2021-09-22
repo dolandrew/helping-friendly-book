@@ -52,7 +52,7 @@ public class TweetListener {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + bearerToken);
-        ResponseEntity<LinkedHashMap> responseEntity = restTemplate.exchange("https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=1", HttpMethod.GET, new HttpEntity<>(headers), LinkedHashMap.class);
+        ResponseEntity<LinkedHashMap> responseEntity = restTemplate.exchange("https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5", HttpMethod.GET, new HttpEntity<>(headers), LinkedHashMap.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
             LinkedHashMap body = responseEntity.getBody();
             if (body != null) {
