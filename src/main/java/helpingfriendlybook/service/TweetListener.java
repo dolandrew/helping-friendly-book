@@ -1,21 +1,20 @@
 package helpingfriendlybook.service;
 
+import helpingfriendlybook.dto.DataDTO;
 import helpingfriendlybook.dto.SongDTO;
+import helpingfriendlybook.dto.TwitterResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 import static java.lang.String.format;
 
@@ -55,13 +54,14 @@ public class TweetListener {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + bearerToken);
-        ResponseEntity<LinkedHashMap> responseEntity = restTemplate.exchange("https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5", HttpMethod.GET, new HttpEntity<>(headers), LinkedHashMap.class);
+        String url = "https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5";
+        var responseEntity = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), TwitterResponseDTO.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            LinkedHashMap body = responseEntity.getBody();
+            TwitterResponseDTO body = responseEntity.getBody();
             if (body != null) {
-                Object data = body.get("data");
+                DataDTO data = body.getData().get(0);
                 if (data != null) {
-                    String fetchedSongName = (String) ((LinkedHashMap) ((List) data).get(0)).get("text");
+                    String fetchedSongName = data.getText();
                     String cleanedSongName = cleanSongName(fetchedSongName);
                     if (sameTweet(fetchedSongName)) {
                         return;
