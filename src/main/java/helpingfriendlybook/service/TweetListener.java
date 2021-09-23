@@ -48,6 +48,11 @@ public class TweetListener {
         this.googliTweeter.tweet(format("HelpingFriendlyBook started successfully at %s.", new Date()));
     }
 
+    @Scheduled(initialDelay = 0, fixedDelay = 1000 * 60 * 15)
+    public void guayusa() {
+        restTemplate.getForObject("http://helping-friendly-book.herokuapp.com", String.class);
+    }
+
     @Scheduled(initialDelay = 0, fixedDelay = 10000)
     public void listenToPhishFTR() {
         LOG.warn("Checking for tweets...");
