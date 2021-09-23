@@ -39,6 +39,9 @@ public class Tweeter {
     }
 
     public void tweet(SongDTO songDTO) {
+        if (songDTO == null) {
+            return;
+        }
 
         String tweet = "";
         if (songDTO.getTimes() == 0) {

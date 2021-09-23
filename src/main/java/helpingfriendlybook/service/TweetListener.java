@@ -48,7 +48,7 @@ public class TweetListener {
         this.googliTweeter.tweet(format("HelpingFriendlyBook started successfully at %s.", new Date()));
     }
 
-    @Scheduled(initialDelay = 0, fixedDelay = 20000)
+    @Scheduled(initialDelay = 0, fixedDelay = 10000)
     public void listenToPhishFTR() {
         LOG.warn("Checking for tweets...");
 
@@ -59,11 +59,11 @@ public class TweetListener {
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
             TwitterResponseDTO body = responseEntity.getBody();
             if (body != null) {
-                DataDTO data = body.getData().get(0);
-                if (data != null) {
+                if (body.getData() != null) {
+                    DataDTO data = body.getData().get(0);
                     String fetchedSongName = data.getText();
                     String cleanedSongName = cleanSongName(fetchedSongName);
-                    if (sameTweet(fetchedSongName)) {
+                    if (sameTweet(cleanedSongName)) {
                         return;
                     }
                     currentSongName = cleanedSongName;

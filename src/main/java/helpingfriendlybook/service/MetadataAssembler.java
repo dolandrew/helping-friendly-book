@@ -15,8 +15,11 @@ public class MetadataAssembler {
 
     private final SongLoader songLoader;
 
-    public MetadataAssembler(SongLoader songLoader) {
+    private final GoogliTweeter googliTweeter;
+
+    public MetadataAssembler(SongLoader songLoader, GoogliTweeter googliTweeter) {
         this.songLoader = songLoader;
+        this.googliTweeter = googliTweeter;
     }
 
     public SongDTO assembleMetadata(String songName) {
@@ -27,6 +30,15 @@ public class MetadataAssembler {
                 .filter(song -> song.getNameLower().contains(songName.toLowerCase()))
                 .collect(Collectors.toList());
         if (!currentSongDTOList.isEmpty()) {
+            if (currentSongDTOList.size() > 1) {
+
+                String tweet = "Cannot choose between: ";
+                for (SongDTO song : currentSongDTOList) {
+                    tweet += song.getName() + ", ";
+                }
+                googliTweeter.tweet(tweet);
+                return null;
+            }
             SongDTO fetchedSong = currentSongDTOList.get(0);
             songDTO.setName(fetchedSong.getName());
             songDTO.setGap(fetchedSong.getGap());
