@@ -1,6 +1,5 @@
 package helpingfriendlybook.service;
 
-import helpingfriendlybook.dto.SongDTO;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import org.apache.http.client.HttpClient;
@@ -16,48 +15,29 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 
 @Service
-public class Tweeter {
+public class GoogliTweeter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Tweeter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GoogliTweeter.class);
 
-    @Value("${twitter.api.key}")
+    @Value("${twitter.googli.api.key}")
     private String apiKey;
 
-    @Value("${twitter.api.key.secret}")
+    @Value("${twitter.googli.api.key.secret}")
     private String apiKeySecret;
 
-    @Value("${twitter.access.token}")
+    @Value("${twitter.googli.access.token}")
     private String accessToken;
 
-    @Value("${twitter.access.token.secret}")
+    @Value("${twitter.googli.access.token.secret}")
     private String accessTokenSecret;
 
     private final Environment environment;
 
-    public Tweeter(Environment environment) {
+    public GoogliTweeter(Environment environment) {
         this.environment = environment;
     }
 
-    public void tweet(SongDTO songDTO) {
-
-        String tweet = "";
-        if (songDTO.getTimes() == 0) {
-            tweet = "DEBUT: " + songDTO.getName();
-        } else {
-            if (songDTO.getGap() > 20) {
-                tweet = "BUSTOUT: ";
-            }
-            tweet += songDTO.getName() + " has been played " + songDTO.getTimes() + " times" +
-                    "\nLast played: " + songDTO.getLastPlayed() +
-                    "\nShow gap: " + songDTO.getGap() +
-                    "\nFirst played on: " + songDTO.getDebut() +
-                    "\n" + songDTO.getLink();
-        }
-
-        tweet(tweet);
-    }
-
-    private void tweet(String tweet) {
+    public void tweet(String tweet) {
         OAuthConsumer oAuthConsumer = new CommonsHttpOAuthConsumer(apiKey, apiKeySecret);
         oAuthConsumer.setTokenWithSecret(accessToken, accessTokenSecret);
 
