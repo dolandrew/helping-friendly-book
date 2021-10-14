@@ -45,7 +45,6 @@ public class TweetListener {
         this.metadataAssembler = metadataAssembler;
         this.tweeter = tweeter;
         this.googliTweeter = googliTweeter;
-        this.googliTweeter.tweet(format("HelpingFriendlyBook started successfully at %s.", new Date()));
     }
 
     @Scheduled(initialDelay = 0, fixedDelay = 10000)

@@ -13,6 +13,8 @@ public class CaffeineService {
 
     private final RestTemplate restTemplate;
 
+    private static final String APP_NAME = "helping-friendly-book";
+
     public CaffeineService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -20,6 +22,6 @@ public class CaffeineService {
     @Scheduled(initialDelay = 0, fixedDelay = 1000 * 60 * 15)
     public void guayusa() {
         LOG.warn("Caffeinating...");
-        restTemplate.getForObject("http://helping-friendly-book.herokuapp.com", Void.class);
+        restTemplate.getForObject("http://" + APP_NAME + ".herokuapp.com", Void.class);
     }
 }
