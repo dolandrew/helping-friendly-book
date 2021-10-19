@@ -47,7 +47,7 @@ public class TweetListener {
         this.googliTweeter = googliTweeter;
     }
 
-    @Scheduled(initialDelay = 0, fixedDelay = 10000)
+    @Scheduled(initialDelay = 0, fixedDelay = 30000)
     public void listenToPhishFTR() {
         LOG.warn("Checking for tweets...");
 
