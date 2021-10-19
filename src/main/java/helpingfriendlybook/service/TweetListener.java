@@ -30,7 +30,7 @@ public class TweetListener {
         this.twitterService = twitterService;
     }
 
-    @Scheduled(initialDelay = 0, fixedDelay = 30000)
+    @Scheduled(initialDelay = 0, fixedDelay = 15000)
     public void listenToPhishFTR() {
         LOG.warn("Checking for tweets...");
 
