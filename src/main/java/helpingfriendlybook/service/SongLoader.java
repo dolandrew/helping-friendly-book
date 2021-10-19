@@ -20,10 +20,13 @@ public class SongLoader {
 
     private final RestTemplate restTemplate;
 
+    private final GoogliTweeter googliTweeter;
+
     private String PHISH_NET_URL = "https://www.phish.net";
 
-    public SongLoader(RestTemplate restTemplate) {
+    public SongLoader(RestTemplate restTemplate, GoogliTweeter googliTweeter) {
         this.restTemplate = restTemplate;
+        this.googliTweeter = googliTweeter;
     }
 
     public List<SongDTO> getSongs() {
@@ -59,8 +62,8 @@ public class SongLoader {
                 songDTO.setGap(Integer.valueOf(cleanedGap));
                 songs.add(songDTO);
             } catch (Exception e) {
-                LOG.error("Caught exception while processing song: " + songDTO.getName() , e);
-                throw e;
+                LOG.warn("Caught exception while processing song: " + songDTO.getName() , e);
+                googliTweeter.tweet("HFB caught exception: " + e.getCause());
             }
         }
         LOG.warn("Successfully fetched songs.");
