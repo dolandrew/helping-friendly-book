@@ -57,7 +57,11 @@ public class Tweeter {
                     "\n" + songDTO.getLink();
         }
 
-        tweet(tweet);
+        tweet(addHashtags(tweet));
+    }
+
+    private String addHashtags(String tweet) {
+        return tweet + "\n#phish #phishstats #phishcompanion #livephish #phishfromtheroad";
     }
 
     private void tweet(String tweet) {

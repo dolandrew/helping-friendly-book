@@ -51,33 +51,38 @@ public class TweetListener {
     public void listenToPhishFTR() {
         LOG.warn("Checking for tweets...");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + bearerToken);
-        String url = "https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5";
-        var responseEntity = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), TwitterResponseDTO.class);
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            TwitterResponseDTO body = responseEntity.getBody();
-            if (body != null) {
-                if (body.getData() != null) {
-                    DataDTO data = body.getData().get(0);
-                    String fetchedSongName = data.getText();
-                    String cleanedSongName = cleanSongName(fetchedSongName);
-                    if (sameTweet(cleanedSongName)) {
-                        return;
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Bearer " + bearerToken);
+            String url = "https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5";
+            var responseEntity = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), TwitterResponseDTO.class);
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                TwitterResponseDTO body = responseEntity.getBody();
+                if (body != null) {
+                    if (body.getData() != null) {
+                        DataDTO data = body.getData().get(0);
+                        String fetchedSongName = data.getText();
+                        String cleanedSongName = cleanSongName(fetchedSongName);
+                        if (sameTweet(cleanedSongName)) {
+                            return;
+                        }
+                        currentSongName = cleanedSongName;
+                        if (shouldIgnoreTweet(fetchedSongName)) {
+                            return;
+                        }
+                        LOG.warn("Found new song: " + cleanedSongName);
+                        SongDTO songDTO = metadataAssembler.assembleMetadata(cleanedSongName);
+                        tweeter.tweet(songDTO);
+                    } else {
+                        LOG.error("Found no tweets!");
                     }
-                    currentSongName = cleanedSongName;
-                    if (shouldIgnoreTweet(fetchedSongName)) {
-                        return;
-                    }
-                    LOG.warn("Found new song: " + cleanedSongName);
-                    SongDTO songDTO = metadataAssembler.assembleMetadata(cleanedSongName);
-                    tweeter.tweet(songDTO);
-                } else {
-                    LOG.error("Found no tweets!");
                 }
+            } else {
+                LOG.error("Unable to fetch tweets.");
+                googliTweeter.tweet("Error - HFB was unable to fetch tweets");
             }
-        } else {
-            LOG.error("Unable to fetch tweets.");
+        } catch (Exception e) {
+            googliTweeter.tweet("HFB caught exception: " + e.getCause());
         }
     }
 
