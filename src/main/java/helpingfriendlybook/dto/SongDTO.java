@@ -8,6 +8,8 @@ public class SongDTO {
 
     private String name;
 
+    private String aliasOf;
+
     private String link;
 
     private String lastPlayed;
@@ -17,6 +19,10 @@ public class SongDTO {
     private String nameLower;
 
     private int times;
+
+    public String getAliasOf() {
+        return aliasOf;
+    }
 
     public String getDebut() {
         return debut;
@@ -40,6 +46,10 @@ public class SongDTO {
 
     public int getTimes() {
         return times;
+    }
+
+    public void setAliasOf(String aliasOf) {
+        this.aliasOf = aliasOf;
     }
 
     public void setDebut(String debut) {

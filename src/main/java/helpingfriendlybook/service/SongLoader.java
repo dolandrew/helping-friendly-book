@@ -51,7 +51,8 @@ public class SongLoader {
                 }
                 if (cells.get(2).wholeText().contains("Alias of")) {
                     LOG.info(songName + " is an alias.");
-                    //TODO handle alias
+                    songDTO.setAliasOf(cells.get(2).wholeText().replaceAll("Alias of ", ""));
+                    songs.add(songDTO);
                     continue;
                 }
                 songDTO.setTimes(Integer.valueOf(cells.get(2).wholeText()));

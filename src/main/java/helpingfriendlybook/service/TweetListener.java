@@ -2,8 +2,10 @@ package helpingfriendlybook.service;
 
 import helpingfriendlybook.dto.SongDTO;
 import helpingfriendlybook.dto.TwitterResponseDTO;
+import io.micrometer.core.instrument.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,6 +25,11 @@ public class TweetListener {
 
     private final TwitterService twitterService;
 
+    @Value("${one.time.song}")
+    private String oneTimeSong;
+
+    private boolean processed;
+
     public TweetListener(MetadataAssembler metadataAssembler, Tweeter tweeter, GoogliTweeter googliTweeter, TwitterService twitterService) {
         this.metadataAssembler = metadataAssembler;
         this.tweeter = tweeter;
@@ -35,9 +42,19 @@ public class TweetListener {
         LOG.warn("Checking for tweets...");
 
         try {
+            if (processed) {
+                LOG.warn("Skipping because already processed one.time.song");
+                return;
+            }
+
+            if (StringUtils.isNotBlank(oneTimeSong)) {
+                processOneTimeTweet();
+                return;
+            }
+
             ResponseEntity<TwitterResponseDTO> responseEntity = twitterService.getTweets();
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                SongDTO songDTO = metadataAssembler.assembleMetadata(responseEntity);
+                SongDTO songDTO = metadataAssembler.processTweet(responseEntity);
                 if (songDTO != null) {
                     twitterService.favoriteTweetById(responseEntity.getBody().getData().get(0).getId());
                     tweeter.tweet(songDTO);
@@ -49,5 +66,15 @@ public class TweetListener {
         } catch (Exception e) {
             googliTweeter.tweet("HFB caught exception: " + e.getCause());
         }
+    }
+
+    private void processOneTimeTweet() {
+        LOG.warn("Found one time song from config one.time.song");
+        googliTweeter.tweet("Found one time song: " + oneTimeSong);
+        SongDTO songDTO = metadataAssembler.assembleMetadata(oneTimeSong);
+        tweeter.tweet(songDTO);
+
+        oneTimeSong = null;
+        processed = true;
     }
 }

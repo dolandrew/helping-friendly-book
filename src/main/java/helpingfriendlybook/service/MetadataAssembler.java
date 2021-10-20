@@ -31,7 +31,7 @@ public class MetadataAssembler {
         this.twitterService = twitterService;
     }
 
-    public SongDTO assembleMetadata(ResponseEntity<TwitterResponseDTO> responseEntity) {
+    public SongDTO processTweet(ResponseEntity<TwitterResponseDTO> responseEntity) {
         TwitterResponseDTO body = responseEntity.getBody();
         if (body != null) {
             if (body.getData() != null) {
@@ -46,24 +46,7 @@ public class MetadataAssembler {
                     twitterService.favoriteTweetById(responseEntity.getBody().getData().get(0).getId());
                     return null;
                 }
-                LOG.warn("Found new song: " + cleanedSongName);
-                LOG.warn("Assembling metadata for: " + cleanedSongName);
-                SongDTO songDTO = new SongDTO();
-                songDTO.setName(cleanedSongName);
-                List<SongDTO> currentSongDTOList = songLoader.getSongs().stream()
-                        .filter(song -> song.getNameLower().equals(cleanedSongName.toLowerCase()))
-                        .collect(Collectors.toList());
-                if (!currentSongDTOList.isEmpty()) {
-                    SongDTO fetchedSong = currentSongDTOList.get(0);
-                    songDTO.setName(fetchedSong.getName());
-                    songDTO.setGap(fetchedSong.getGap());
-                    songDTO.setLastPlayed(fetchedSong.getLastPlayed());
-                    songDTO.setLink(fetchedSong.getLink());
-                    songDTO.setTimes(fetchedSong.getTimes());
-                    songDTO.setDebut(fetchedSong.getDebut());
-                }
-                LOG.warn("Successfully assembled metadata.");
-                return songDTO;
+                return assembleMetadata(cleanedSongName);
             } else {
                 LOG.error("Found no tweets!");
             }
@@ -71,6 +54,32 @@ public class MetadataAssembler {
         return null;
     }
 
+    public SongDTO assembleMetadata(String cleanedSongName) {
+        LOG.warn("Found new song: " + cleanedSongName);
+        LOG.warn("Assembling metadata for: " + cleanedSongName);
+        SongDTO songDTO = new SongDTO();
+        songDTO.setName(cleanedSongName);
+        List<SongDTO> currentSongDTOList = songLoader.getSongs().stream()
+                .filter(song -> song.getNameLower().equals(cleanedSongName.toLowerCase()))
+                .collect(Collectors.toList());
+        if (!currentSongDTOList.isEmpty()) {
+            SongDTO fetchedSong = currentSongDTOList.get(0);
+            if (fetchedSong.getAliasOf() != null) {
+                googliTweeter.tweet("HFB recognized " + fetchedSong.getName() + " as an alias of: " + fetchedSong.getAliasOf());
+                return assembleMetadata(fetchedSong.getAliasOf());
+            }
+            songDTO.setName(fetchedSong.getName());
+            songDTO.setGap(fetchedSong.getGap());
+            songDTO.setLastPlayed(fetchedSong.getLastPlayed());
+            songDTO.setLink(fetchedSong.getLink());
+            songDTO.setTimes(fetchedSong.getTimes());
+            songDTO.setDebut(fetchedSong.getDebut());
+        } else {
+            googliTweeter.tweet("HFB tried to assemble metadata but found no results");
+        }
+        LOG.warn("Successfully assembled metadata.");
+        return songDTO;
+    }
 
     private boolean sameTweet(String fetchedSongName) {
         if (fetchedSongName.equals(currentSongName)) {
