@@ -101,7 +101,6 @@ public class MetadataAssembler {
                 || fetchedSongName.matches(".*[0-9]+/[0-9]+/[0-9]{4}.*")
         ) {
             LOG.warn("Skipping tweet: " + fetchedSongName);
-            googliTweeter.tweet(String.format("Ignored @Phish_FTR tweet at %s", new Date()));
             return true;
         }
         return false;

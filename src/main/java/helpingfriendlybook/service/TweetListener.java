@@ -11,6 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @EnableScheduling
 @Service
 public class TweetListener {
@@ -39,12 +41,13 @@ public class TweetListener {
 
     private boolean processed;
 
+    private boolean tweetedConfigs;
+
     public TweetListener(MetadataAssembler metadataAssembler, Tweeter tweeter, GoogliTweeter googliTweeter, TwitterService twitterService) {
         this.metadataAssembler = metadataAssembler;
         this.tweeter = tweeter;
         this.googliTweeter = googliTweeter;
         this.twitterService = twitterService;
-        googliTweeter.tweet("HFB started with properties\ncron=" + cron + "\nbustout.threshold=" + bustoutThreshold + "\ncustom.hashtags=" + customHashtags + "\none.time.song=" + oneTimeSong);
     }
 
     @Scheduled(cron="${cron}")
@@ -52,16 +55,15 @@ public class TweetListener {
         LOG.warn("Checking for tweets...");
 
         try {
-            if (processed) {
-                LOG.warn("Skipping because already processed one.time.song");
-                return;
-            }
-
+            tweetPropertiesOnStartup();
             if (StringUtils.isNotBlank(oneTimeSong)) {
+                if (processed) {
+                    LOG.warn("Skipping because already processed one.time.song");
+                    return;
+                }
                 processOneTimeTweet();
                 return;
             }
-
             ResponseEntity<TwitterResponseDTO> responseEntity = twitterService.getTweets();
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 SongDTO songDTO = metadataAssembler.processTweet(responseEntity);
@@ -75,6 +77,13 @@ public class TweetListener {
             }
         } catch (Exception e) {
             googliTweeter.tweet("HFB caught exception: " + e.getCause());
+        }
+    }
+
+    private void tweetPropertiesOnStartup() {
+        if (!tweetedConfigs) {
+            googliTweeter.tweet("HFB started at " + new Date() + "\nwith properties:\ncron=" + cron + "\nbustout.threshold=" + bustoutThreshold + "\ncustom.hashtags=" + customHashtags + "\none.time.song=" + oneTimeSong);
+            tweetedConfigs = true;
         }
     }
 
