@@ -82,7 +82,7 @@ public class TweetListener {
 
     private void tweetPropertiesOnStartup() {
         if (!tweetedConfigs) {
-            googliTweeter.tweet("HFB started at " + new Date() + "\nwith properties:\ncron=" + cron + "\nbustout.threshold=" + bustoutThreshold + "\ncustom.hashtags=" + customHashtags + "\none.time.song=" + oneTimeSong);
+            googliTweeter.tweet("HFB started\ncron=" + cron.replaceAll("\\*", "") + "\nbustout.threshold=" + bustoutThreshold + "\ncustom.hashtags=" + customHashtags + "\none.time.song=" + oneTimeSong + "\n" + System.currentTimeMillis());
             tweetedConfigs = true;
         }
     }

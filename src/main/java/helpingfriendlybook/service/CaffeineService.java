@@ -23,6 +23,5 @@ public class CaffeineService {
     public void guayusa() {
         LOG.warn("Caffeinating...");
         restTemplate.getForObject("http://" + APP_NAME + ".herokuapp.com/index.html", String.class);
-        LOG.warn("Ahhhhh...");
     }
 }
