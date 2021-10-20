@@ -32,6 +32,9 @@ public class Tweeter {
     @Value("${twitter.access.token.secret}")
     private String accessTokenSecret;
 
+    @Value("${bustout.threshold}")
+    private Integer bustoutThreshold;
+
     private final Environment environment;
 
     public Tweeter(Environment environment) {
@@ -47,7 +50,7 @@ public class Tweeter {
         if (songDTO.getTimes() == 0) {
             tweet = "DEBUT: " + songDTO.getName();
         } else {
-            if (songDTO.getGap() > 20) {
+            if (songDTO.getGap() > bustoutThreshold) {
                 tweet = "BUSTOUT: ";
             }
             tweet += songDTO.getName() + " has been played " + songDTO.getTimes() + " times" +
