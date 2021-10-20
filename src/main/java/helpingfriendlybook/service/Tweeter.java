@@ -36,7 +36,7 @@ public class Tweeter {
     private Integer bustoutThreshold;
 
     @Value("${custom.hashtags}")
-    private String additionalHashtags;
+    private String customHashtags;
 
     private final Environment environment;
 
@@ -67,7 +67,7 @@ public class Tweeter {
     }
 
     private String addHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #phishfromtheroad " + additionalHashtags;
+        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #phishfromtheroad " + customHashtags;
     }
 
     private void tweet(String tweet) {

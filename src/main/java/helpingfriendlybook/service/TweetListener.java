@@ -28,6 +28,15 @@ public class TweetListener {
     @Value("${one.time.song}")
     private String oneTimeSong;
 
+    @Value("${bustout.threshold}")
+    private Integer bustoutThreshold;
+
+    @Value("${custom.hashtags}")
+    private String customHashtags;
+
+    @Value("${cron}")
+    private String cron;
+
     private boolean processed;
 
     public TweetListener(MetadataAssembler metadataAssembler, Tweeter tweeter, GoogliTweeter googliTweeter, TwitterService twitterService) {
@@ -35,6 +44,7 @@ public class TweetListener {
         this.tweeter = tweeter;
         this.googliTweeter = googliTweeter;
         this.twitterService = twitterService;
+        googliTweeter.tweet("HFB started with properties\ncron=" + cron + "\nbustout.threshold=" + bustoutThreshold + "\ncustom.hashtags=" + customHashtags + "\none.time.song=" + oneTimeSong);
     }
 
     @Scheduled(cron="${cron}")
