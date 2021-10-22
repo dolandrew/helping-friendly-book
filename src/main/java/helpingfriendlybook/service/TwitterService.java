@@ -17,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+
 @Service
 public class TwitterService {
 
@@ -49,34 +52,84 @@ public class TwitterService {
         this.environment = environment;
     }
 
+    public ResponseEntity<TwitterResponseDTO> getTweets() {
+        LOG.warn("Checking for tweets...");
+        String url = "https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5";
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+    }
+
+    public void tweet(String tweet, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret) {
+        String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
+        String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
+        String failureMessage = "Error trying to tweet: \"" + tweet + "\".";
+
+        post(url, null, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
+    }
+
+    public void tweet(String tweet) {
+        if (tweet == null) {
+            return;
+        }
+        String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
+        String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
+        String successMessage = "Tweeted: \"" + tweet + "\".";
+        String failureMessage = "Error trying to tweet: \"" + tweet + "\".";
+
+        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
+    }
+
     public void favoriteTweetById(String id) {
         String url = "https://api.twitter.com/1.1/favorites/create.json?id=" + id;
+        String successMessage = "Successfully liked tweet.";
+        String failureMessage = "Error trying to like tweet.";
 
-        OAuthConsumer oAuthConsumer = new CommonsHttpOAuthConsumer(apiKey, apiKeySecret);
-        oAuthConsumer.setTokenWithSecret(accessToken, accessTokenSecret);
+        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
+    }
 
-        HttpPost httpPost = new HttpPost(url);
+    private boolean localEnvironment() {
+        return environment.getActiveProfiles().length > 0 && environment.getActiveProfiles()[0].equals("local");
+    }
 
+    private void followUser(String userId) {
+        String url = "https://api.twitter.com/1.1/friendships/create.json?user_id=" + userId;
+        String successMessage = "Successfully followed user with id: " + userId;
+        String failureMessage = "Error trying to follow user with id: " + userId;
+
+        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
+    }
+
+    private void post(String url, String successMessage, String failureMessage, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret) {
         try {
+            OAuthConsumer oAuthConsumer = new CommonsHttpOAuthConsumer(apiKey, apiKeySecret);
+            oAuthConsumer.setTokenWithSecret(accessToken, accessTokenSecret);
+            HttpPost httpPost = new HttpPost(url);
             oAuthConsumer.sign(httpPost);
-
             HttpClient httpClient = new DefaultHttpClient();
-            if (environment.getActiveProfiles().length > 0 && environment.getActiveProfiles()[0].equals("local")) {
-                return;
-            }
+            if (localEnvironment()) return;
             httpClient.execute(httpPost);
-            LOG.warn("Successfully liked tweet.");
-
+            if (successMessage != null) {
+                LOG.warn(successMessage);
+            }
         } catch (Exception e) {
-            LOG.error("Error trying to like tweet.");
+            LOG.error(failureMessage, e);
         }
     }
 
-    public ResponseEntity<TwitterResponseDTO> getTweets() {
+    private void getFollowersList(String tweetId) {
+        String url = "https://api.twitter.com/1.1/followers/list.json?screen/" + tweetId + " /liking_users";
+        var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+        response.getBody().getData().forEach(data -> followUser(data.getId()));
+    }
+
+    private void followFavoritesById(String tweetId) {
+        String url = "https://api.twitter.com/2/tweets/" + tweetId + " /liking_users";
+        var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+        response.getBody().getData().forEach(data -> followUser(data.getId()));
+    }
+
+    private HttpHeaders getHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + bearerToken);
-        String url = "https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5";
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), TwitterResponseDTO.class);
-
+        return headers;
     }
 }

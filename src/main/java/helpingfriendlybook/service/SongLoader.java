@@ -22,7 +22,7 @@ public class SongLoader {
 
     private final GoogliTweeter googliTweeter;
 
-    private String PHISH_NET_URL = "https://www.phish.net";
+    private static final String PHISH_NET_URL = "https://www.phish.net";
 
     public SongLoader(RestTemplate restTemplate, GoogliTweeter googliTweeter) {
         this.restTemplate = restTemplate;
@@ -30,7 +30,7 @@ public class SongLoader {
     }
 
     public List<SongDTO> getSongs() {
-        LOG.warn("Fetching metadata...");
+        LOG.warn("Fetching songs...");
         String response = restTemplate.getForObject(PHISH_NET_URL + "/song", String.class);
         Document doc = Jsoup.parse(response);
         Elements rows = doc.getElementsByTag("tr");
@@ -63,11 +63,10 @@ public class SongLoader {
                 songDTO.setGap(Integer.valueOf(cleanedGap));
                 songs.add(songDTO);
             } catch (Exception e) {
-                LOG.warn("Caught exception while processing song: " + songDTO.getName() , e);
-                googliTweeter.tweet("HFB caught exception: " + e.getCause());
+                googliTweeter.tweet("HFB caught exception while processing song: " + songDTO.getName(), e);
             }
         }
-        LOG.warn("Successfully fetched songs.");
+        LOG.warn("Successfully fetched " + songs.size() + " songs.");
         return songs;
     }
 }
