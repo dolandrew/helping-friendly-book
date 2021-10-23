@@ -35,6 +35,6 @@ public class GoogliTweeter {
 
     public void tweet(String tweet, Throwable e) {
         LOG.warn("@GoogliApparatus tweeted: \"" + tweet + "\"", e);
-        twitterService.tweet(tweet + "\n\n" + System.currentTimeMillis(), apiKey, apiKeySecret, accessToken, accessTokenSecret);
+        twitterService.tweet(tweet + ": " + e.getCause() + "\n\n" + System.currentTimeMillis(), apiKey, apiKeySecret, accessToken, accessTokenSecret);
     }
 }

@@ -63,7 +63,7 @@ public class SongLoader {
                 songDTO.setGap(Integer.valueOf(cleanedGap));
                 songs.add(songDTO);
             } catch (Exception e) {
-                googliTweeter.tweet("HFB caught exception while processing song: " + songDTO.getName(), e);
+                googliTweeter.tweet("HFB caught exception while processing \"" + songDTO.getName() + "\"", e);
             }
         }
         LOG.warn("Successfully fetched " + songs.size() + " songs.");
