@@ -38,10 +38,13 @@ public class TweetListener {
     @Value("${cron}")
     private String cron;
 
-    private String currentSongName;
-
     @Value("${ignored.song}")
     private String ignoredSong;
+
+    @Value("${twitter.phish.ftr.id}")
+    private String phishFTRid;
+
+    private String currentSongName;
 
     private boolean tweetedConfigs;
 
@@ -58,12 +61,8 @@ public class TweetListener {
             tweetPropertiesOnStartup();
             processOneTimeSong();
 
-            ResponseEntity<TwitterResponseDTO> responseEntity = twitterService.getTweets();
+            ResponseEntity<TwitterResponseDTO> responseEntity = twitterService.getTweetsForUserId(phishFTRid);
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-
-                //TODO: followFavorites
-                //twitterService.followFavoritesById(responseEntity.getBody().getData().get(0).getId());
-
                 String songName = processIncomingTweet(responseEntity);
                 if (songName != null) {
                     if (songName.equals(ignoredSong)) {

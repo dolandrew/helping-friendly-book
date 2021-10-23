@@ -25,13 +25,12 @@ public class TwitterService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TwitterService.class);
 
+    private final Environment environment;
+
     private final RestTemplate restTemplate;
 
     @Value("${twitter.bearerToken}")
     private String bearerToken;
-
-    @Value("${twitter.phish.ftr.id}")
-    private String phishFTRid;
 
     @Value("${twitter.api.key}")
     private String apiKey;
@@ -45,16 +44,14 @@ public class TwitterService {
     @Value("${twitter.access.token.secret}")
     private String accessTokenSecret;
 
-    private final Environment environment;
-
     public TwitterService(RestTemplate restTemplate, Environment environment) {
         this.restTemplate = restTemplate;
         this.environment = environment;
     }
 
-    public ResponseEntity<TwitterResponseDTO> getTweets() {
+    public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(String userId) {
         LOG.warn("Checking for tweets...");
-        String url = "https://api.twitter.com/2/users/" + phishFTRid + " /tweets?max_results=5";
+        String url = "https://api.twitter.com/2/users/" + userId + " /tweets?max_results=5";
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
     }
 
@@ -86,11 +83,20 @@ public class TwitterService {
         post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
     }
 
+    public void followFavoritesById(String tweetId) {
+        String url = "https://api.twitter.com/2/tweets/" + tweetId + " /liking_users";
+        var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+        if (response.getBody() != null && response.getBody().getData() != null) {
+            response.getBody().getData().forEach(data -> followUser(data.getId()));
+        }
+    }
+
     private boolean localEnvironment() {
         return environment.getActiveProfiles().length > 0 && environment.getActiveProfiles()[0].equals("local");
     }
 
     private void followUser(String userId) {
+        LOG.warn("Attempting to follow user with id: " + userId);
         String url = "https://api.twitter.com/1.1/friendships/create.json?user_id=" + userId;
         String successMessage = "Successfully followed user with id: " + userId;
         String failureMessage = "Error trying to follow user with id: " + userId;
@@ -113,18 +119,6 @@ public class TwitterService {
         } catch (Exception e) {
             LOG.error(failureMessage, e);
         }
-    }
-
-    private void getFollowersList(String tweetId) {
-        String url = "https://api.twitter.com/1.1/followers/list.json?screen/" + tweetId + " /liking_users";
-        var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
-        response.getBody().getData().forEach(data -> followUser(data.getId()));
-    }
-
-    private void followFavoritesById(String tweetId) {
-        String url = "https://api.twitter.com/2/tweets/" + tweetId + " /liking_users";
-        var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
-        response.getBody().getData().forEach(data -> followUser(data.getId()));
     }
 
     private HttpHeaders getHeaders() {

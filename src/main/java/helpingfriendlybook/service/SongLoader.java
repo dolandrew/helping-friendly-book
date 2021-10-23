@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public class SongLoader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MetadataAssembler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SongLoader.class);
 
     private final RestTemplate restTemplate;
 
