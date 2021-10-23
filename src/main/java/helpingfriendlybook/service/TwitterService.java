@@ -83,12 +83,14 @@ public class TwitterService {
         post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
     }
 
-    public void followFavoritesById(String tweetId) {
+    public Integer followFavoritesById(String tweetId) {
         String url = "https://api.twitter.com/2/tweets/" + tweetId + " /liking_users";
         var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
         if (response.getBody() != null && response.getBody().getData() != null) {
             response.getBody().getData().forEach(data -> followUser(data.getId()));
+            return response.getBody().getData().size();
         }
+        return 0;
     }
 
     private boolean localEnvironment() {
