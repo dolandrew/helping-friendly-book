@@ -95,7 +95,24 @@ public class TweetListener {
 
     private void tweetPropertiesOnStartup() {
         if (!tweetedConfigs) {
-            googliTweeter.tweet("HFB started\ncron=" + cron.replaceAll("\\*", "") + "\nbustout.threshold=" + bustoutThreshold + "\ncustom.hashtags=" + customHashtags + "\none.time.song=" + oneTimeSong + "\nignored.song=" + ignoredSong);
+            String tweet = "HFB started";
+            if (StringUtils.isNotBlank(cron)) {
+                tweet += "\ncron=" + cron.replaceAll("\\*", "\u2738");
+            }
+            if (bustoutThreshold != null) {
+                tweet += "\nbustout.threshold=" + bustoutThreshold;
+            }
+            if (StringUtils.isNotBlank(customHashtags)) {
+                tweet += "\ncustom.hashtags=" + customHashtags;
+            }
+            if (StringUtils.isNotBlank(oneTimeSong)) {
+                tweet +=  "\none.time.song=" + oneTimeSong;
+            }
+            if (StringUtils.isNotBlank(ignoredSong)) {
+                tweet += "\nignored.song=" + ignoredSong;
+
+            }
+            googliTweeter.tweet(tweet);
             tweetedConfigs = true;
         }
     }
