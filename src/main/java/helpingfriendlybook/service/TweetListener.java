@@ -122,14 +122,14 @@ public class TweetListener {
         TwitterResponseDTO body = responseEntity.getBody();
         if (body != null) {
             if (body.getData() != null) {
-                LOG.warn("Found tweets.");
                 DataDTO data = body.getData().get(0);
                 String fetchedSongName = data.getText();
                 cleanedSongName = cleanSongName(fetchedSongName);
                 if (sameTweet(cleanedSongName)) {
-                    LOG.warn("No new tweets.");
+                    LOG.warn("Found no new tweets.");
                     return null;
                 }
+                LOG.warn("Found new tweet.");
                 currentSongName = cleanedSongName;
                 String tweetId = responseEntity.getBody().getData().get(0).getId();
                 twitterService.favoriteTweetById(tweetId);
