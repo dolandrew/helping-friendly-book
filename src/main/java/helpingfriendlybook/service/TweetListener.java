@@ -161,6 +161,10 @@ public class TweetListener {
             LOG.warn("Skipping tweet: " + fetchedSongName);
             return true;
         }
+        if (fetchedSongName.startsWith("RT ")) {
+            LOG.warn("Skipping retweet: " + fetchedSongName);
+            return true;
+        }
         return false;
     }
 
