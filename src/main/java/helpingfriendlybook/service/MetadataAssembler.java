@@ -44,7 +44,7 @@ public class MetadataAssembler {
             songDTO.setTimes(fetchedSong.getTimes());
             songDTO.setDebut(fetchedSong.getDebut());
         } else {
-            googliTweeter.tweet("HFB tried to assemble metadata for " + songName + " but found no results.");
+            googliTweeter.tweet("HFB tried to assemble metadata for " + songName + " but found no results. Assuming this is a debut.");
         }
         LOG.warn("Successfully assembled metadata for: " + songName + "");
         return songDTO;

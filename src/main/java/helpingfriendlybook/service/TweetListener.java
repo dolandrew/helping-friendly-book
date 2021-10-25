@@ -137,7 +137,7 @@ public class TweetListener {
                     return null;
                 }
             } else {
-                googliTweeter.tweet("HFB found no tweets!");
+                LOG.warn("HFB found no tweets in given time period.");
             }
         }
         return cleanedSongName;

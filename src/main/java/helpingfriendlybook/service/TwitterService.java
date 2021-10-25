@@ -19,6 +19,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 @Service
 public class TwitterService {
@@ -51,8 +56,13 @@ public class TwitterService {
 
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(String userId) {
         LOG.warn("Checking for tweets...");
-        String url = "https://api.twitter.com/2/users/" + userId + " /tweets?max_results=5";
+        var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=retweets,replies&max_results=5&start_time=" + getFiveMinutesAgo();
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+    }
+
+    private String getFiveMinutesAgo() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
+        return ZonedDateTime.now(ZoneId.of("UTC")).minus(1, MINUTES).format(formatter);
     }
 
     public void tweet(String tweet, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret) {
