@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Random;
 
 @Service
 public class PhishNetService {
@@ -37,8 +38,8 @@ public class PhishNetService {
     public void getShowsOnThisDay() {
         try {
             ZonedDateTime today = OffsetDateTime.now().atZoneSameInstant(ZoneId.of("America/Los_Angeles"));
-            googliTweeter.tweet("Looking for shows on " + today + "...");
-            String url = "https://phish.net/setlists/?month=" + today.getMonth() + 1 + "&day=" + today.getDayOfMonth();
+            googliTweeter.tweet("Looking for shows on " + today.getMonthValue() + "-" + today.getDayOfMonth() + "...");
+            String url = "https://phish.net/setlists/?month=" + today.getMonthValue() + "&day=" + today.getDayOfMonth();
             String response = restTemplate.getForObject(url, String.class);
             processResponse(response, today);
         } catch (Exception e) {
@@ -50,28 +51,29 @@ public class PhishNetService {
         Document doc = Jsoup.parse(response);
         int setlists = doc.getElementsByClass("setlist").size();
         if (today != null) {
-            googliTweeter.tweet("Found " + setlists + " shows on " + today + ".");
+            googliTweeter.tweet("HFB found " + setlists + " shows on " + today.getMonthValue() + "-" + today.getDayOfMonth() + ".");
         }
         if (setlists == 0) {
             tweetRandomShow();
             return;
         }
 
-        doc.getElementsByClass("setlist").forEach(element -> {
-            String tweet = "";
-            if (today != null) {
-                tweet += "#OnThisDay\n";
-            } else {
-                tweet += "#RandomShow\n";
-            }
-            tweet = addActualDate(element, tweet);
-            tweet = addVenue(element, tweet);
-            tweet = addLocation(element, tweet);
-            tweet = addLink(element, tweet);
-            tweet = tweetWriter.addBasicHashtags(tweet);
+        int random = new Random().nextInt(setlists);
 
-            twitterService.tweet(tweet);
-        });
+        Element element = doc.getElementsByClass("setlist").get(random);
+        String tweet = "";
+        if (today != null) {
+            tweet += "#OnThisDay\n";
+        } else {
+            tweet += "#RandomShow\n";
+        }
+        tweet = addActualDate(element, tweet);
+        tweet = addVenue(element, tweet);
+        tweet = addLocation(element, tweet);
+        tweet = addLink(element, tweet);
+        tweet = tweetWriter.addShowHashtags(tweet);
+
+        twitterService.tweet(tweet);
     }
 
     private void tweetRandomShow() {

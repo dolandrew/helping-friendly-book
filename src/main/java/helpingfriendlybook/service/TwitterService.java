@@ -60,7 +60,7 @@ public class TwitterService {
         String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
         String failureMessage = "Error trying to tweet: \"" + tweet + "\".";
 
-        post(url, null, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
+        post(url, null, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, tweet);
     }
 
     public void tweet(String tweet) {
@@ -72,7 +72,7 @@ public class TwitterService {
         String successMessage = "Tweeted: \"" + encodedTweet + "\".";
         String failureMessage = "Error trying to tweet: \"" + encodedTweet + "\".";
 
-        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
+        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, tweet);
     }
 
     public void favoriteTweetById(String id) {
@@ -80,7 +80,7 @@ public class TwitterService {
         String successMessage = "Successfully liked tweet.";
         String failureMessage = "Error trying to like tweet.";
 
-        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
+        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, null);
     }
 
     public Integer followFavoritesById(String tweetId) {
@@ -103,17 +103,22 @@ public class TwitterService {
         String successMessage = "Successfully followed user with id: " + userId;
         String failureMessage = "Error trying to follow user with id: " + userId;
 
-        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
+        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, null);
     }
 
-    private void post(String url, String successMessage, String failureMessage, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret) {
+    private void post(String url, String successMessage, String failureMessage, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret, String tweet) {
         try {
             OAuthConsumer oAuthConsumer = new CommonsHttpOAuthConsumer(apiKey, apiKeySecret);
             oAuthConsumer.setTokenWithSecret(accessToken, accessTokenSecret);
             HttpPost httpPost = new HttpPost(url);
             oAuthConsumer.sign(httpPost);
             HttpClient httpClient = new DefaultHttpClient();
-            if (localEnvironment()) return;
+            if (localEnvironment()) {
+                if (tweet != null) {
+                    LOG.warn("Would have tweeted: " + tweet);
+                }
+                return;
+            }
             httpClient.execute(httpPost);
             if (successMessage != null) {
                 LOG.warn(successMessage);
