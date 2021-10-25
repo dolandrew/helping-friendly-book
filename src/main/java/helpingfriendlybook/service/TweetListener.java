@@ -171,7 +171,7 @@ public class TweetListener {
     private String cleanSongName(String fetchedSongName) {
         return fetchedSongName
                 .replaceAll("&gt; ", "")
-                .replaceAll("&gt;&gt; ", "")
+                .replaceAll("&gt;", "")
                 .replaceAll("SET ONE: ", "")
                 .replaceAll("SET TWO: ", "")
                 .replaceAll("ENCORE: ", "");
