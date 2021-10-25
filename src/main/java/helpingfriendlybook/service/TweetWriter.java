@@ -3,6 +3,7 @@ package helpingfriendlybook.service;
 import helpingfriendlybook.dto.SongDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -10,7 +11,10 @@ public class TweetWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(TweetWriter.class);
 
-    public String writeTweet(SongDTO songDTO, Integer bustoutThreshold, String customHashtags) {
+    @Value("${custom.hashtags}")
+    private String customHashtags;
+
+    public String writeTweet(SongDTO songDTO, Integer bustoutThreshold) {
         if (songDTO == null) {
             return null;
         }
@@ -29,13 +33,17 @@ public class TweetWriter {
                     "\n" + songDTO.getLink();
         }
 
-        String tweetWithHashtags = addHashtags(tweet, customHashtags);
+        String tweetWithHashtags = addHashtags(tweet);
         LOG.warn("Created tweet: " + tweetWithHashtags);
 
         return tweetWithHashtags;
     }
 
-    private String addHashtags(String tweet, String customHashtags) {
+    public String addHashtags(String tweet) {
         return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #phishfromtheroad " + customHashtags;
+    }
+
+    public String addBasicHashtags(String tweet) {
+        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #phishfromtheroad ";
     }
 }

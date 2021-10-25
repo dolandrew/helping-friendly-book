@@ -69,8 +69,8 @@ public class TwitterService {
         }
         String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
         String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
-        String successMessage = "Tweeted: \"" + tweet + "\".";
-        String failureMessage = "Error trying to tweet: \"" + tweet + "\".";
+        String successMessage = "Tweeted: \"" + encodedTweet + "\".";
+        String failureMessage = "Error trying to tweet: \"" + encodedTweet + "\".";
 
         post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret);
     }

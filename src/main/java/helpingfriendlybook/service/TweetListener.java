@@ -81,7 +81,7 @@ public class TweetListener {
 
     private void processOutgoingTweet(String songName) {
         SongDTO songDTO = metadataAssembler.assembleMetadata(songName);
-        String tweet = tweetWriter.writeTweet(songDTO, bustoutThreshold, customHashtags);
+        String tweet = tweetWriter.writeTweet(songDTO, bustoutThreshold);
         twitterService.tweet(tweet);
     }
 
