@@ -3,7 +3,6 @@ package helpingfriendlybook.service;
 import helpingfriendlybook.dto.DataDTO;
 import helpingfriendlybook.dto.SongDTO;
 import helpingfriendlybook.dto.TwitterResponseDTO;
-import io.micrometer.core.instrument.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,17 +25,8 @@ public class TweetListener {
 
     private final TwitterService twitterService;
 
-    @Value("${one.time.song}")
-    private String oneTimeSong;
-
     @Value("${bustout.threshold}")
     private Integer bustoutThreshold;
-
-    @Value("${custom.hashtags}")
-    private String customHashtags;
-
-    @Value("${cron.listen}")
-    private String cron;
 
     @Value("${ignored.song}")
     private String ignoredSong;
@@ -45,8 +35,6 @@ public class TweetListener {
     private String phishFTRid;
 
     private String currentSongName;
-
-    private boolean tweetedConfigs;
 
     public TweetListener(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter, TwitterService twitterService) {
         this.metadataAssembler = metadataAssembler;
@@ -58,21 +46,14 @@ public class TweetListener {
     @Scheduled(cron="${cron.listen}")
     public void listenToPhishFTR() {
         try {
-            tweetPropertiesOnStartup();
-            processOneTimeSong();
-
-            ResponseEntity<TwitterResponseDTO> responseEntity = twitterService.getTweetsForUserIdInLastFiveMinutes(phishFTRid);
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                String songName = processIncomingTweet(responseEntity);
-                if (songName != null) {
-                    if (songName.equals(ignoredSong)) {
-                        googliTweeter.tweet("Ignored expected song: " + ignoredSong);
-                    } else {
-                        processOutgoingTweet(songName);
-                    }
+            var tweets = twitterService.getTweetsForUserIdInLastFiveMinutes(phishFTRid);
+            String songName = processIncomingTweet(tweets);
+            if (songName != null) {
+                if (songName.equals(ignoredSong)) {
+                    googliTweeter.tweet("Ignored expected song: " + ignoredSong);
+                } else {
+                    processOutgoingTweet(songName);
                 }
-            } else {
-                googliTweeter.tweet("HFB was unable to fetch tweets!");
             }
         } catch (Exception e) {
             googliTweeter.tweet("HFB caught exception: " + e.getCause());
@@ -83,35 +64,6 @@ public class TweetListener {
         SongDTO songDTO = metadataAssembler.assembleMetadata(songName);
         String tweet = tweetWriter.writeTweet(songDTO, bustoutThreshold);
         twitterService.tweet(tweet);
-    }
-
-    private void processOneTimeSong() {
-        if (StringUtils.isNotBlank(oneTimeSong)) {
-            googliTweeter.tweet("Found one time song: " + oneTimeSong);
-            processOutgoingTweet(oneTimeSong);
-            oneTimeSong = null;
-        }
-    }
-
-    private void tweetPropertiesOnStartup() {
-        if (!tweetedConfigs) {
-            String tweet = "HFB started successfully";
-            if (bustoutThreshold != null) {
-                tweet += "\nbustout.threshold=" + bustoutThreshold;
-            }
-            if (StringUtils.isNotBlank(customHashtags)) {
-                tweet += "\ncustom.hashtags=" + customHashtags;
-            }
-            if (StringUtils.isNotBlank(oneTimeSong)) {
-                tweet +=  "\none.time.song=" + oneTimeSong;
-            }
-            if (StringUtils.isNotBlank(ignoredSong)) {
-                tweet += "\nignored.song=" + ignoredSong;
-
-            }
-            googliTweeter.tweet(tweet);
-            tweetedConfigs = true;
-        }
     }
 
     private String processIncomingTweet(ResponseEntity<TwitterResponseDTO> responseEntity) {

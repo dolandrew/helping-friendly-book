@@ -23,7 +23,6 @@ public class MetadataAssembler {
     }
 
     public SongDTO assembleMetadata(String songName) {
-        LOG.warn("Found new song: " + songName);
         LOG.warn("Assembling metadata for: " + songName);
         SongDTO songDTO = new SongDTO();
         songDTO.setName(songName);

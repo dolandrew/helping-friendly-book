@@ -14,7 +14,7 @@ import java.time.ZonedDateTime;
 import java.util.Random;
 
 @Service
-public class PhishNetService {
+public class OnThisDayService {
 
     private final RestTemplate restTemplate;
 
@@ -24,10 +24,10 @@ public class PhishNetService {
 
     private final TweetWriter tweetWriter;
 
-    public PhishNetService(RestTemplate restTemplate,
-                           TwitterService twitterService,
-                           GoogliTweeter googliTweeter,
-                           TweetWriter tweetWriter) {
+    public OnThisDayService(RestTemplate restTemplate,
+                            TwitterService twitterService,
+                            GoogliTweeter googliTweeter,
+                            TweetWriter tweetWriter) {
         this.restTemplate = restTemplate;
         this.twitterService = twitterService;
         this.googliTweeter = googliTweeter;

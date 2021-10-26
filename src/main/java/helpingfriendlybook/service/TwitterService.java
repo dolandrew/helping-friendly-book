@@ -1,5 +1,6 @@
 package helpingfriendlybook.service;
 
+import helpingfriendlybook.config.HFBConfig;
 import helpingfriendlybook.dto.TwitterResponseDTO;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
@@ -8,7 +9,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,24 +34,12 @@ public class TwitterService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${twitter.bearerToken}")
-    private String bearerToken;
+    private final HFBConfig creds;
 
-    @Value("${twitter.api.key}")
-    private String apiKey;
-
-    @Value("${twitter.api.key.secret}")
-    private String apiKeySecret;
-
-    @Value("${twitter.access.token}")
-    private String accessToken;
-
-    @Value("${twitter.access.token.secret}")
-    private String accessTokenSecret;
-
-    public TwitterService(RestTemplate restTemplate, Environment environment) {
+    public TwitterService(RestTemplate restTemplate, Environment environment, HFBConfig creds) {
         this.restTemplate = restTemplate;
         this.environment = environment;
+        this.creds = creds;
     }
 
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(String userId) {
@@ -88,7 +76,8 @@ public class TwitterService {
         String successMessage = "Tweeted: \"" + encodedTweet + "\".";
         String failureMessage = "Error trying to tweet: \"" + encodedTweet + "\".";
 
-        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, tweet);
+        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
+                creds.getAccessToken(), creds.getAccessTokenSecret(), tweet);
     }
 
     public void favoriteTweetById(String id) {
@@ -96,7 +85,8 @@ public class TwitterService {
         String successMessage = "Successfully liked tweet.";
         String failureMessage = "Error trying to like tweet.";
 
-        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, null);
+        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
+                creds.getAccessToken(), creds.getAccessTokenSecret(), null);
     }
 
     public Integer followFavoritesById(String tweetId) {
@@ -119,7 +109,8 @@ public class TwitterService {
         String successMessage = "Successfully followed user with id: " + userId;
         String failureMessage = "Error trying to follow user with id: " + userId;
 
-        post(url, successMessage, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, null);
+        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
+                creds.getAccessToken(), creds.getAccessTokenSecret(), null);
     }
 
     private void post(String url, String successMessage, String failureMessage, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret, String tweet) {
@@ -146,7 +137,7 @@ public class TwitterService {
 
     private HttpHeaders getHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + bearerToken);
+        headers.add("Authorization", "Bearer " + creds.getBearerToken());
         return headers;
     }
 }
