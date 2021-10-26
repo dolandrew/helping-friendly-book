@@ -35,7 +35,7 @@ public class TweetListener {
     @Value("${custom.hashtags}")
     private String customHashtags;
 
-    @Value("${cron}")
+    @Value("${cron.listen}")
     private String cron;
 
     @Value("${ignored.song}")
@@ -55,7 +55,7 @@ public class TweetListener {
         this.twitterService = twitterService;
     }
 
-    @Scheduled(cron="${cron}")
+    @Scheduled(cron="${cron.listen}")
     public void listenToPhishFTR() {
         try {
             tweetPropertiesOnStartup();
