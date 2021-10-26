@@ -30,7 +30,7 @@ public class Follower {
 
     @Scheduled(cron="${cron.follow}")
     public void follow() {
-        googliTweeter.tweet("Following users who liked the last " + followedUserTweets + " tweets for userId: " + followedUser + "...");
+        googliTweeter.tweet("Following users who liked the last " + followedUserTweets + " tweet(s) for userId: " + followedUser + "...");
         try {
             ResponseEntity<TwitterResponseDTO> responseEntity = twitterService.getTweetsForUserId(followedUser);
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
@@ -38,7 +38,7 @@ public class Follower {
                 for (int i = 0; i < followedUserTweets; i++ ) {
                     usersFollowed += twitterService.followFavoritesById(responseEntity.getBody().getData().get(i).getId());
                 }
-                googliTweeter.tweet("PhishCompanion followed " + usersFollowed + " users at " + new Date() + ".");
+                googliTweeter.tweet("PhishCompanion requested to follow " + usersFollowed + " users at " + new Date() + ".");
             } else {
                 googliTweeter.tweet("HFB was unable to fetch tweets!");
             }

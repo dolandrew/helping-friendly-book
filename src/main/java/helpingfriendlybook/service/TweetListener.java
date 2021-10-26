@@ -61,7 +61,7 @@ public class TweetListener {
             tweetPropertiesOnStartup();
             processOneTimeSong();
 
-            ResponseEntity<TwitterResponseDTO> responseEntity = twitterService.getTweetsForUserId(phishFTRid);
+            ResponseEntity<TwitterResponseDTO> responseEntity = twitterService.getTweetsForUserIdInLastFiveMinutes(phishFTRid);
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 String songName = processIncomingTweet(responseEntity);
                 if (songName != null) {

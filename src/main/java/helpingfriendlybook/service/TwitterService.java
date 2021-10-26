@@ -56,6 +56,12 @@ public class TwitterService {
 
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(String userId) {
         LOG.warn("Checking for tweets...");
+        String url = "https://api.twitter.com/2/users/" + userId + " /tweets?max_results=5";
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+    }
+
+    public ResponseEntity<TwitterResponseDTO> getTweetsForUserIdInLastFiveMinutes(String userId) {
+        LOG.warn("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=retweets,replies&max_results=5&start_time=" + getFiveMinutesAgo();
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
     }
