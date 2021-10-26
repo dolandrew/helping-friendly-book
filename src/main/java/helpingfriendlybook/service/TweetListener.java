@@ -95,10 +95,7 @@ public class TweetListener {
 
     private void tweetPropertiesOnStartup() {
         if (!tweetedConfigs) {
-            String tweet = "HFB started";
-            if (StringUtils.isNotBlank(cron)) {
-                tweet += "\ncron=" + cron.replaceAll("\\*", "\u2738");
-            }
+            String tweet = "HFB started successfully";
             if (bustoutThreshold != null) {
                 tweet += "\nbustout.threshold=" + bustoutThreshold;
             }
