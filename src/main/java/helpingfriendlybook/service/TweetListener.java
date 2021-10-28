@@ -56,7 +56,7 @@ public class TweetListener {
                 }
             }
         } catch (Exception e) {
-            googliTweeter.tweet("HFB caught exception: " + e.getCause());
+            googliTweeter.tweet("HFB caught exception: " + e.getMessage());
         }
     }
 

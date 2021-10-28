@@ -91,7 +91,7 @@ public class OnThisDayService {
 
     private String addLocation(Element element, String tweet) {
         String location = element.getElementsByClass("setlist-location").get(0).wholeText().replace("\n", "").replace("\t", "");
-        tweet += location + " " + " \n";
+        tweet += location.replaceAll(",", ", ") + " " + " \n";
         return tweet;
     }
 
