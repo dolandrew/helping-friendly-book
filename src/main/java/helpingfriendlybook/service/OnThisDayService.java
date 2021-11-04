@@ -71,6 +71,8 @@ public class OnThisDayService {
         tweet = addVenue(element, tweet);
         tweet = addLocation(element, tweet);
         tweet = addLink(element, tweet);
+        // TODO: add link to relisten, phish'n, phishtracks
+        // TODO: add total shows
         tweet = tweetWriter.addShowHashtags(tweet);
 
         twitterService.tweet(tweet);

@@ -19,7 +19,7 @@ public class CaffeineService {
         this.restTemplate = restTemplate;
     }
 
-    @Scheduled(initialDelay = 10000, fixedDelay = 1000 * 60 * 15)
+    @Scheduled(cron = "0 */15 * * * *")
     public void guayusa() {
         LOG.warn("Caffeinating...");
         restTemplate.getForObject("http://" + APP_NAME + ".herokuapp.com/index.html", String.class);
