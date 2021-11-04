@@ -123,6 +123,10 @@ public class TweetListener {
                 .replaceAll("&gt;", "")
                 .replaceAll("SET ONE: ", "")
                 .replaceAll("SET TWO: ", "")
+                .replaceAll("SET THREE: ", "")
+                .replaceAll("SET FOUR: ", "")
+                .replaceAll("SET FIVE: ", "")
+                .replaceAll("ENCORE TWO: ", "")
                 .replaceAll("ENCORE: ", "");
     }
 }
