@@ -48,4 +48,8 @@ public class TweetWriter {
     public String addShowHashtags(String tweet) {
         return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #otd" + OffsetDateTime.now().getYear();
     }
+
+    public String addRandomShowHashtags(String tweet) {
+        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #randomshow";
+    }
 }
