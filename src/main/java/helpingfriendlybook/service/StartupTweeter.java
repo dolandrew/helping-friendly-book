@@ -4,8 +4,6 @@ import io.micrometer.core.instrument.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-
 @Component
 public class StartupTweeter {
     private final GoogliTweeter googliTweeter;
@@ -26,7 +24,7 @@ public class StartupTweeter {
         this.googliTweeter = googliTweeter;
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void tweetPropertiesOnStartup() {
         String tweet = "HFB started successfully";
         if (bustoutThreshold != null) {
