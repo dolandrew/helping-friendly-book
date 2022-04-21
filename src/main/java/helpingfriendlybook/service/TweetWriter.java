@@ -30,8 +30,8 @@ public class TweetWriter {
             }
             tweet += songDTO.getName() + " has been played " + songDTO.getTimes() + " times" +
                     "\nLast played: " + songDTO.getLastPlayed() +
-                    "\nShow gap: " + songDTO.getGap() +
-                    "\nFirst played on: " + songDTO.getDebut() +
+                    "\nGap: " + songDTO.getGap() +
+                    "\nFirst played on " + songDTO.getDebut() +
                     "\n" + songDTO.getLink();
         }
 
