@@ -13,7 +13,10 @@ import org.springframework.web.client.RestTemplate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Random;
+
+import static java.util.Collections.emptyList;
 
 @Service
 public class OnThisDayService {
@@ -39,52 +42,56 @@ public class OnThisDayService {
     }
 
     @Scheduled(cron="${cron.shows}")
-    public void getShowsOnThisDay() {
+    public void tweetOnThisDayOrRandomShow() {
         try {
             ZonedDateTime today = OffsetDateTime.now().atZoneSameInstant(ZoneId.of("America/Los_Angeles"));
-            LOG.warn("Looking for shows on " + today.getMonthValue() + "-" + today.getDayOfMonth() + "...");
-            String url = "https://phish.net/setlists/?month=" + today.getMonthValue() + "&day=" + today.getDayOfMonth();
-            String response = restTemplate.getForObject(url, String.class);
-            processResponse(response, today);
+            Element show = getRandomShowForDate(today.getDayOfMonth(), today.getMonthValue(), null);
+            if (show == null) {
+                tweetRandomShow();
+                return;
+            }
+            tweetTheShow(show, today);
         } catch (Exception e) {
             googliTweeter.tweet("Caught exception trying to post shows on this day!" , e.getCause());
         }
     }
 
-    private void processResponse(String response, ZonedDateTime today) {
+    public Element getRandomShowForDate(Integer day, Integer month, Integer year) {
+        LOG.warn("Looking for shows on " + month + "-" + day + "...");
+        String url = "https://phish.net/setlists/?month=" + month + "&day=" + day + (year != null ? "&year=" + year : "");
+        String response = restTemplate.getForObject(url, String.class);
+        List<Element> shows = getShowsFromResponse(response);
+        if (shows.isEmpty()) {
+            return null;
+        }
+        LOG.warn("HFB found " + shows.size() + " shows on " + (year != null ? year + "-" : "") + month + "-" + day + ".");
+        int random = new Random().nextInt(shows.size());
+        return shows.get(random);
+    }
+
+    private List<Element> getShowsFromResponse(String response) {
         Document doc = Jsoup.parse(response);
         int setlists = doc.getElementsByClass("setlist").size();
-        if (today != null) {
-            LOG.warn("HFB found " + setlists + " shows on " + today.getMonthValue() + "-" + today.getDayOfMonth() + ".");
-        }
+
         if (setlists == 0) {
-            tweetRandomShow();
-            return;
+            return emptyList();
         }
 
-        int random = new Random().nextInt(setlists);
+        return doc.getElementsByClass("setlist");
+    }
 
-        Element element = doc.getElementsByClass("setlist").get(random);
-        String tweet = "";
-        if (today != null) {
-            tweet += "#OnThisDay\n";
-        } else {
-            tweet += "#RandomShow\n";
-        }
-        tweet = addActualDate(element, tweet);
-        tweet = addVenue(element, tweet);
-        tweet = addLocation(element, tweet);
-        tweet = addLink(element, tweet);
+    private void tweetTheShow(Element show, ZonedDateTime today) {
+        int setlists = show.getElementsByClass("setlist").size();
+        String tweet = "#OnThisDay\n";
+        tweet = addActualDate(show, tweet);
+        tweet = addVenue(show, tweet);
+        tweet = addLocation(show, tweet);
+        tweet = addLink(show, tweet);
         // TODO: add link to relisten, phish'n, phishtracks
-        if (today != null) {
-            if (setlists > 1) {
-                tweet = addTotalShows(setlists, today, tweet);
-            }
-            tweet = tweetWriter.addShowHashtags(tweet);
-        } else {
-            tweet = tweetWriter.addRandomShowHashtags(tweet);
-
+        if (setlists > 1) {
+            tweet = addTotalShows(setlists, today, tweet);
         }
+        tweet = tweetWriter.addShowHashtags(tweet);
 
         twitterService.tweet(tweet);
     }
@@ -96,9 +103,14 @@ public class OnThisDayService {
     }
 
     private String addVenue(Element element, String tweet) {
-        String venue = element.getElementsByClass("setlist-venue").get(0).getElementsByTag("span").get(0).wholeText();
-        tweet += WordUtils.capitalize(venue.toLowerCase(), ' ') + " ";
+        String venue = getVenueOfShow(element);
+        tweet += venue;
         return tweet;
+    }
+
+    public String getVenueOfShow(Element element) {
+        String venueRaw = element.getElementsByClass("setlist-venue").get(0).getElementsByTag("span").get(0).wholeText();
+        return WordUtils.capitalize(venueRaw.toLowerCase(), ' ') + " ";
     }
 
     private String addLocation(Element element, String tweet) {
@@ -123,6 +135,14 @@ public class OnThisDayService {
         LOG.warn("Found no shows on this day. Tweeting a random setlist...");
         String url = "https://phish.net/setlists/jump/random";
         String response = restTemplate.getForObject(url, String.class);
-        processResponse(response, null);
+        Element show = getShowsFromResponse(response).get(0);
+        String tweet = "#RandomShow\n";
+        tweet = addActualDate(show, tweet);
+        tweet = addVenue(show, tweet);
+        tweet = addLocation(show, tweet);
+        tweet = addLink(show, tweet);
+        // TODO: add link to relisten, phish'n, phishtracks
+        tweet = tweetWriter.addRandomShowHashtags(tweet);
+        twitterService.tweet(tweet);
     }
 }
