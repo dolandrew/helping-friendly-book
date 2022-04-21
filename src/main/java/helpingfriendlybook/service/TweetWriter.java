@@ -42,7 +42,7 @@ public class TweetWriter {
     }
 
     public String addSongHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #phishfromtheroad " + customHashtags;
+        return tweet + "\n\n#phish #phishstats #phishcompanion " + customHashtags;
     }
 
     public String addShowHashtags(String tweet) {
