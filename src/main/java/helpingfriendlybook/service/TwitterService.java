@@ -1,7 +1,10 @@
 package helpingfriendlybook.service;
 
 import helpingfriendlybook.config.HFBConfig;
+import helpingfriendlybook.dto.DataDTO;
+import helpingfriendlybook.dto.FriendshipDTO;
 import helpingfriendlybook.dto.TwitterResponseDTO;
+import helpingfriendlybook.dto.TwitterUsersResponseDTO;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import org.apache.http.client.HttpClient;
@@ -22,24 +25,64 @@ import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
 @Service
 public class TwitterService {
-
     private static final Logger LOG = LoggerFactory.getLogger(TwitterService.class);
+
+    private final HFBConfig creds;
 
     private final Environment environment;
 
     private final RestTemplate restTemplate;
 
-    private final HFBConfig creds;
-
     public TwitterService(RestTemplate restTemplate, Environment environment, HFBConfig creds) {
         this.restTemplate = restTemplate;
         this.environment = environment;
         this.creds = creds;
+    }
+
+    public void favoriteTweetById(String id) {
+        String url = "https://api.twitter.com/1.1/favorites/create.json?id=" + id;
+        String successMessage = "Successfully liked tweet.";
+        String failureMessage = "Error trying to like tweet.";
+
+        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
+                creds.getAccessToken(), creds.getAccessTokenSecret(), null);
+    }
+
+    public Integer followFavoritesById(String tweetId) {
+        String url = "https://api.twitter.com/2/tweets/" + tweetId + " /liking_users";
+        var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+        if (response.getBody() != null && response.getBody().getData() != null) {
+            response.getBody().getData().forEach(data -> followUser(data.getId()));
+            return response.getBody().getData().size();
+        }
+        return 0;
+    }
+
+    public ResponseEntity<TwitterUsersResponseDTO> getFollowersList(String username) {
+        LOG.warn("Getting followers for " + username + "...");
+        String url = "https://api.twitter.com/1.1/followers/list.json?count=200&screen_name=" + username;
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterUsersResponseDTO.class);
+    }
+
+    public List<DataDTO> getFriendsList(String username) {
+        LOG.warn("Getting friends for " + username + "...");
+        Long cursor = -1L;
+        List<DataDTO> users = new ArrayList<>();
+        while (cursor != 0L) {
+            String url = "https://api.twitter.com/1.1/friends/list.json?cursor=" + cursor + "&count=200&screen_name=" + username;
+            TwitterUsersResponseDTO response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterUsersResponseDTO.class).getBody();
+            users.addAll(response.getUsers());
+            cursor = response.getNext_cursor();
+        }
+        LOG.warn("Found " + users.size() + " friends for " + username + "...");
+        return users;
     }
 
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(String userId) {
@@ -54,9 +97,16 @@ public class TwitterService {
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
     }
 
-    private String getFiveMinutesAgo() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
-        return ZonedDateTime.now(ZoneId.of("UTC")).minus(1, MINUTES).format(formatter);
+    public ResponseEntity<FriendshipDTO> showFriendship(String screenName) {
+        LOG.warn("Getting friendship between me and " + screenName + "...");
+        String url = "https://api.twitter.com/1.1/friendships/show.json?source_screen_name=PhishCompanion&target_screen_name=" + screenName;
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), FriendshipDTO.class);
+    }
+
+    public ResponseEntity<DataDTO> showUser(String screenName) {
+        LOG.warn("Getting " + screenName + "...");
+        String url = "https://api.twitter.com/1.1/users/show.json?screen_name=" + screenName;
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), DataDTO.class);
     }
 
     public void tweet(String tweet, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret) {
@@ -80,27 +130,17 @@ public class TwitterService {
                 creds.getAccessToken(), creds.getAccessTokenSecret(), tweet);
     }
 
-    public void favoriteTweetById(String id) {
-        String url = "https://api.twitter.com/1.1/favorites/create.json?id=" + id;
-        String successMessage = "Successfully liked tweet.";
-        String failureMessage = "Error trying to like tweet.";
+    public void unfollow(DataDTO user) {
+        LOG.warn("Unfollowing " + user.getScreenName() + "...");
+        String url = "https://api.twitter.com/1.1/friendships/destroy.json?user_id=" + user.getId();
+        String failureMessage = "Error trying to unfollow: \"" + user.getScreenName() + "\".";
+        String successMessage = "Successfully unfollowed: \"" + user.getScreenName() + "\".";
 
-        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
-                creds.getAccessToken(), creds.getAccessTokenSecret(), null);
-    }
-
-    public Integer followFavoritesById(String tweetId) {
-        String url = "https://api.twitter.com/2/tweets/" + tweetId + " /liking_users";
-        var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
-        if (response.getBody() != null && response.getBody().getData() != null) {
-            response.getBody().getData().forEach(data -> followUser(data.getId()));
-            return response.getBody().getData().size();
+        if (localEnvironment()) {
+            LOG.warn("Would have unfollowed: " + user.getScreenName());
+            return;
         }
-        return 0;
-    }
-
-    private boolean localEnvironment() {
-        return environment.getActiveProfiles().length > 0 && environment.getActiveProfiles()[0].equals("local");
+        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(), creds.getAccessToken(), creds.getAccessTokenSecret(), null);
     }
 
     private void followUser(String userId) {
@@ -111,6 +151,21 @@ public class TwitterService {
 
         post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
                 creds.getAccessToken(), creds.getAccessTokenSecret(), null);
+    }
+
+    private String getFiveMinutesAgo() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
+        return ZonedDateTime.now(ZoneId.of("UTC")).minus(1, MINUTES).format(formatter);
+    }
+
+    private HttpHeaders getHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + creds.getBearerToken());
+        return headers;
+    }
+
+    private boolean localEnvironment() {
+        return environment.getActiveProfiles().length > 0 && environment.getActiveProfiles()[0].equals("local");
     }
 
     private void post(String url, String successMessage, String failureMessage, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret, String tweet) {
@@ -124,7 +179,6 @@ public class TwitterService {
                 if (tweet != null) {
                     LOG.warn("Would have tweeted: " + tweet);
                 }
-                return;
             }
             httpClient.execute(httpPost);
             if (successMessage != null) {
@@ -133,11 +187,5 @@ public class TwitterService {
         } catch (Exception e) {
             LOG.error(failureMessage, e);
         }
-    }
-
-    private HttpHeaders getHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + creds.getBearerToken());
-        return headers;
     }
 }
