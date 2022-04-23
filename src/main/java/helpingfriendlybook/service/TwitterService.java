@@ -65,12 +65,6 @@ public class TwitterService {
         return 0;
     }
 
-    public ResponseEntity<TwitterUsersResponseDTO> getFollowersList(String username) {
-        LOG.warn("Getting followers for " + username + "...");
-        String url = "https://api.twitter.com/1.1/followers/list.json?count=200&screen_name=" + username;
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterUsersResponseDTO.class);
-    }
-
     public List<DataDTO> getFriendsList(String username) {
         LOG.warn("Getting friends for " + username + "...");
         Long cursor = -1L;
@@ -81,7 +75,21 @@ public class TwitterService {
             users.addAll(response.getUsers());
             cursor = response.getNext_cursor();
         }
-        LOG.warn("Found " + users.size() + " friends for " + username + "...");
+        LOG.warn("Found " + users.size() + " friends for " + username + ".");
+        return users;
+    }
+
+    public List<DataDTO> getFollowersList(String username) {
+        LOG.warn("Getting followers for " + username + "...");
+        Long cursor = -1L;
+        List<DataDTO> users = new ArrayList<>();
+        while (cursor != 0L) {
+            String url = "https://api.twitter.com/1.1/followers/list.json?cursor=" + cursor + "&count=200&screen_name=" + username;
+            TwitterUsersResponseDTO response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterUsersResponseDTO.class).getBody();
+            users.addAll(response.getUsers());
+            cursor = response.getNext_cursor();
+        }
+        LOG.warn("Found " + users.size() + " followers for " + username + ".");
         return users;
     }
 

@@ -1,7 +1,6 @@
 package helpingfriendlybook.service;
 
 import helpingfriendlybook.dto.DataDTO;
-import helpingfriendlybook.dto.FriendshipDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @EnableScheduling
 @Service
@@ -22,16 +23,12 @@ public class Unfollower {
 
     private final TwitterService twitterService;
 
-    private int startingPoint = -1;
-
     private final int maxShowUserRequests = 300;
-
-    private final int maxFriendshipRequests = 15;
-
-    private final int interval = 3;
 
     @Value("${unfollower.threshold}")
     private Integer followerThreshold;
+
+    List<String> checkedUsers = new ArrayList<>();
 
     public Unfollower(GoogliTweeter googliTweeter, TwitterService twitterService) {
         this.googliTweeter = googliTweeter;
@@ -40,64 +37,37 @@ public class Unfollower {
 
     @Scheduled(cron="${cron.unfollow}")
     public void unfollow() {
-        incrementStartingPoint();
         LOG.warn("Looking for users to unfollow...");
+        List<String> unfollowed = new ArrayList<>();
         try {
-            List<String> unfollowed = new ArrayList<>();
-            int friendshipRequests = 0;
             int showUserRequests = 0;
 
-            List<DataDTO> friends = twitterService.getFriendsList("phishcompanion");
+            String myUserName = "PhishCompanion";
+            List<String> friends = twitterService.getFriendsList(myUserName).stream().map(DataDTO::getScreenName).collect(toList());
+            List<String> followers = twitterService.getFollowersList(myUserName).stream().map(DataDTO::getScreenName).collect(toList());
 
-            for (int j = 0; j < friends.size(); j++) {
-                if (friendshipRequests == maxFriendshipRequests) {
-                    LOG.warn("Reached max show friendship requests " + "(" + maxFriendshipRequests + ")");
-                    break;
-                }
+            for (String friend : friends) {
                 if (showUserRequests == maxShowUserRequests) {
                     LOG.warn("Reached max show user requests " + "(" + maxShowUserRequests + ")");
                     break;
                 }
-                if (j % interval != startingPoint) {
-                    continue;
-                }
-                DataDTO friend = friends.get(showUserRequests++);
-                try {
-                    DataDTO user = twitterService.showUser(friend.getScreenName()).getBody();
-                    if (user == null) return;
-                    if (user.getFollowersCount() < followerThreshold) {
-                        FriendshipDTO friendship = twitterService.showFriendship(friend.getScreenName()).getBody();
-                        friendshipRequests++;
-                        if (friendship == null || friendship.getRelationship() == null || friendship.getRelationship().getSource() == null) return;
-                        if (!friendship.getRelationship().getSource().getFollowed_by()) {
-                            LOG.warn("Unfollowing " + user.getScreenName() + "...");
-                            twitterService.unfollow(user);
-                            unfollowed.add(user.getScreenName());
-                        }
+                if (!followers.contains(friend) && !checkedUsers.contains(friend)) {
+                    DataDTO user = twitterService.showUser(friend).getBody();
+                    checkedUsers.add(friend);
+                    showUserRequests++;
+                    if (user != null && user.getFollowersCount() < followerThreshold) {
+                        LOG.warn("Unfollowing " + user.getScreenName() + "...");
+                        twitterService.unfollow(user);
+                        unfollowed.add(user.getScreenName());
                     }
-                } catch (Exception e) {
-                    if (e.getMessage().contains("Too Many Requests")) {
-                        googliTweeter.tweet("Hit request limit trying to unfollow");
-                        tweetUnfollowedRemaining(unfollowed);
-                        return;
-                    }
-                    googliTweeter.tweet("User " + friend.getScreenName() + " not found!");
                 }
                 tweetUnfollowedBatch(unfollowed);
             }
-            tweetUnfollowedRemaining(unfollowed);
             LOG.warn("Finished checking users");
         } catch (Exception e) {
             googliTweeter.tweet("HFB caught exception trying to unfollow: " + e.getCause());
         }
-    }
-
-    private void incrementStartingPoint() {
-        if (startingPoint >= (interval - 1)) {
-            startingPoint = 0;
-        } else {
-            startingPoint++;
-        }
+        tweetUnfollowedRemaining(unfollowed);
     }
 
     private void tweetUnfollowedRemaining(List<String> unfollowed) {
@@ -114,6 +84,6 @@ public class Unfollower {
     }
 
     private void tweetUnfollowed(List<String> unfollowed) {
-        googliTweeter.tweet("PhishCompanion unfollowed " + String.join(", ", unfollowed) + " (<" + followerThreshold + ")");
+        googliTweeter.tweet("PhishCompanion unfollowed " + String.join(", ", unfollowed) + " (<" + followerThreshold + " followers)");
     }
 }
