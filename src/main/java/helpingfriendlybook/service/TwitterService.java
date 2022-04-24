@@ -47,6 +47,16 @@ public class TwitterService {
         this.creds = creds;
     }
 
+    public static String getOneMinuteAgo() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
+        return ZonedDateTime.now(ZoneId.of("UTC")).minus(1, MINUTES).format(formatter);
+    }
+
+    public static String getSomeHoursAgo(int intervalHours) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
+        return ZonedDateTime.now(ZoneId.of("UTC")).minus(intervalHours, HOURS).format(formatter);
+    }
+
     public void favoriteTweetById(String id) {
         String url = "https://api.twitter.com/1.1/favorites/create.json?id=" + id;
         String successMessage = "Successfully liked tweet.";
@@ -66,20 +76,6 @@ public class TwitterService {
         return 0;
     }
 
-    public List<DataDTO> getFriendsList(String username) {
-        LOG.warn("Getting friends for " + username + "...");
-        Long cursor = -1L;
-        List<DataDTO> users = new ArrayList<>();
-        while (cursor != 0L) {
-            String url = "https://api.twitter.com/1.1/friends/list.json?cursor=" + cursor + "&count=200&screen_name=" + username;
-            TwitterUsersResponseDTO response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterUsersResponseDTO.class).getBody();
-            users.addAll(response.getUsers());
-            cursor = response.getNext_cursor();
-        }
-        LOG.warn("Found " + users.size() + " friends for " + username + ".");
-        return users;
-    }
-
     public List<DataDTO> getFollowersList(String username) {
         LOG.warn("Getting followers for " + username + "...");
         Long cursor = -1L;
@@ -94,6 +90,26 @@ public class TwitterService {
         return users;
     }
 
+    public List<DataDTO> getFriendsList(String username) {
+        LOG.warn("Getting friends for " + username + "...");
+        Long cursor = -1L;
+        List<DataDTO> users = new ArrayList<>();
+        while (cursor != 0L) {
+            String url = "https://api.twitter.com/1.1/friends/list.json?cursor=" + cursor + "&count=200&screen_name=" + username;
+            TwitterUsersResponseDTO response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterUsersResponseDTO.class).getBody();
+            users.addAll(response.getUsers());
+            cursor = response.getNext_cursor();
+        }
+        LOG.warn("Found " + users.size() + " friends for " + username + ".");
+        return users;
+    }
+
+    public ResponseEntity<TwitterResponseDTO> getTweetsAndRetweetsForUserIdInLast(String userId, String timeframe) {
+        LOG.warn("Checking for tweets...");
+        var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=replies&max_results=5&start_time=" + timeframe;
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+    }
+
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(String userId) {
         LOG.warn("Checking for tweets...");
         String url = "https://api.twitter.com/2/users/" + userId + " /tweets?max_results=5";
@@ -103,12 +119,6 @@ public class TwitterService {
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserIdInLast(String userId, String timeframe) {
         LOG.warn("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=retweets,replies&max_results=5&start_time=" + timeframe;
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
-    }
-
-    public ResponseEntity<TwitterResponseDTO> getTweetsAndRetweetsForUserIdInLast(String userId, String timeframe) {
-        LOG.warn("Checking for tweets...");
-        var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=replies&max_results=5&start_time=" + timeframe;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
     }
 
@@ -166,16 +176,6 @@ public class TwitterService {
 
         post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
                 creds.getAccessToken(), creds.getAccessTokenSecret(), null);
-    }
-
-    public static String getOneMinuteAgo() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
-        return ZonedDateTime.now(ZoneId.of("UTC")).minus(1, MINUTES).format(formatter);
-    }
-
-    public static String getSomeHoursAgo(int intervalHours) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
-        return ZonedDateTime.now(ZoneId.of("UTC")).minus(intervalHours, HOURS).format(formatter);
     }
 
     private HttpHeaders getHeaders() {

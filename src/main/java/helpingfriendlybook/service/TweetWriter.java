@@ -10,11 +10,22 @@ import java.time.OffsetDateTime;
 
 @Service
 public class TweetWriter {
-
     private static final Logger LOG = LoggerFactory.getLogger(TweetWriter.class);
 
     @Value("${custom.hashtags}")
     private String customHashtags;
+
+    public String addRandomShowHashtags(String tweet) {
+        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #randomshow";
+    }
+
+    public String addShowHashtags(String tweet) {
+        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #otd" + OffsetDateTime.now().getYear();
+    }
+
+    public String addSongHashtags(String tweet) {
+        return tweet + "\n\n#phish #phishstats #phishcompanion " + customHashtags;
+    }
 
     public String writeTweet(SongDTO songDTO, Integer bustoutThreshold) {
         if (songDTO == null) {
@@ -51,17 +62,5 @@ public class TweetWriter {
         } else {
             return times + "th";
         }
-    }
-
-    public String addSongHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion " + customHashtags;
-    }
-
-    public String addShowHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #otd" + OffsetDateTime.now().getYear();
-    }
-
-    public String addRandomShowHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #randomshow";
     }
 }

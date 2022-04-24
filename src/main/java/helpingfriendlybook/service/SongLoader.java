@@ -15,14 +15,13 @@ import java.util.List;
 
 @Component
 public class SongLoader {
-
     private static final Logger LOG = LoggerFactory.getLogger(SongLoader.class);
 
-    private final RestTemplate restTemplate;
+    private static final String PHISH_NET_URL = "https://www.phish.net";
 
     private final GoogliTweeter googliTweeter;
 
-    private static final String PHISH_NET_URL = "https://www.phish.net";
+    private final RestTemplate restTemplate;
 
     public SongLoader(RestTemplate restTemplate, GoogliTweeter googliTweeter) {
         this.restTemplate = restTemplate;

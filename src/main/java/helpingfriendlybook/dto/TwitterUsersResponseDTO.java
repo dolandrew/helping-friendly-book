@@ -6,20 +6,20 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TwitterUsersResponseDTO {
-    private List<DataDTO> users;
-
     private Long next_cursor;
+
+    private List<DataDTO> users;
 
     public Long getNext_cursor() {
         return next_cursor;
     }
 
-    public List<DataDTO> getUsers() {
-        return users;
-    }
-
     public void setNext_cursor(Long next_cursor) {
         this.next_cursor = next_cursor;
+    }
+
+    public List<DataDTO> getUsers() {
+        return users;
     }
 
     public void setUsers(List<DataDTO> users) {

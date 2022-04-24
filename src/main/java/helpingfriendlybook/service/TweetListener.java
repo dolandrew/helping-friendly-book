@@ -16,27 +16,26 @@ import static helpingfriendlybook.service.TwitterService.getOneMinuteAgo;
 @EnableScheduling
 @Service
 public class TweetListener {
-
     private static final Logger LOG = LoggerFactory.getLogger(TweetListener.class);
+
+    private final GoogliTweeter googliTweeter;
 
     private final MetadataAssembler metadataAssembler;
 
     private final TweetWriter tweetWriter;
-
-    private final GoogliTweeter googliTweeter;
 
     private final TwitterService twitterService;
 
     @Value("${bustout.threshold}")
     private Integer bustoutThreshold;
 
+    private String currentSongName;
+
     @Value("${ignored.song}")
     private String ignoredSong;
 
     @Value("${twitter.phish.ftr.id}")
     private String phishFTRid;
-
-    private String currentSongName;
 
     public TweetListener(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter, TwitterService twitterService) {
         this.metadataAssembler = metadataAssembler;
@@ -45,7 +44,7 @@ public class TweetListener {
         this.twitterService = twitterService;
     }
 
-    @Scheduled(cron="${cron.listen}")
+    @Scheduled(cron = "${cron.listen}")
     public void listenToPhishFTR() {
         try {
             var tweets = twitterService.getTweetsForUserIdInLast(phishFTRid, getOneMinuteAgo());
@@ -62,10 +61,17 @@ public class TweetListener {
         }
     }
 
-    private void processOutgoingTweet(String songName) {
-        SongDTO songDTO = metadataAssembler.assembleMetadata(songName);
-        String tweet = tweetWriter.writeTweet(songDTO, bustoutThreshold);
-        twitterService.tweet(tweet);
+    private String cleanSongName(String fetchedSongName) {
+        return fetchedSongName
+                .replaceAll("&gt; ", "")
+                .replaceAll("&gt;", "")
+                .replaceAll("SET ONE: ", "")
+                .replaceAll("SET TWO: ", "")
+                .replaceAll("SET THREE: ", "")
+                .replaceAll("SET FOUR: ", "")
+                .replaceAll("SET FIVE: ", "")
+                .replaceAll("ENCORE TWO: ", "")
+                .replaceAll("ENCORE: ", "");
     }
 
     private String processIncomingTweet(ResponseEntity<TwitterResponseDTO> responseEntity) {
@@ -94,15 +100,20 @@ public class TweetListener {
         return cleanedSongName;
     }
 
+    private void processOutgoingTweet(String songName) {
+        SongDTO songDTO = metadataAssembler.assembleMetadata(songName);
+        String tweet = tweetWriter.writeTweet(songDTO, bustoutThreshold);
+        twitterService.tweet(tweet);
+    }
+
     private boolean sameTweet(String fetchedSongName) {
         return fetchedSongName.equals(currentSongName);
     }
 
-    private boolean shouldIgnoreTweet(String fetchedSongName)  {
+    private boolean shouldIgnoreTweet(String fetchedSongName) {
         if (fetchedSongName == null) {
             LOG.warn("Skipping empty tweet");
             return true;
-
         }
         if (fetchedSongName.contains("\uD83D\uDCF8")
                 || fetchedSongName.contains("@rene_huemer")
@@ -117,18 +128,5 @@ public class TweetListener {
             return true;
         }
         return false;
-    }
-
-    private String cleanSongName(String fetchedSongName) {
-        return fetchedSongName
-                .replaceAll("&gt; ", "")
-                .replaceAll("&gt;", "")
-                .replaceAll("SET ONE: ", "")
-                .replaceAll("SET TWO: ", "")
-                .replaceAll("SET THREE: ", "")
-                .replaceAll("SET FOUR: ", "")
-                .replaceAll("SET FIVE: ", "")
-                .replaceAll("ENCORE TWO: ", "")
-                .replaceAll("ENCORE: ", "");
     }
 }

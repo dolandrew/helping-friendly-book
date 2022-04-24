@@ -5,6 +5,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class HFBConfig {
+    @Value("${twitter.access.token}")
+    private String accessToken;
+
+    @Value("${twitter.access.token.secret}")
+    private String accessTokenSecret;
 
     @Value("${twitter.api.key}")
     private String apiKey;
@@ -12,22 +17,8 @@ public class HFBConfig {
     @Value("${twitter.api.key.secret}")
     private String apiKeySecret;
 
-    @Value("${twitter.access.token}")
-    private String accessToken;
-
-    @Value("${twitter.access.token.secret}")
-    private String accessTokenSecret;
-
     @Value("${twitter.bearerToken}")
     private String bearerToken;
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public String getApiKeySecret() {
-        return apiKeySecret;
-    }
 
     public String getAccessToken() {
         return accessToken;
@@ -35,6 +26,14 @@ public class HFBConfig {
 
     public String getAccessTokenSecret() {
         return accessTokenSecret;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public String getApiKeySecret() {
+        return apiKeySecret;
     }
 
     public String getBearerToken() {

@@ -4,31 +4,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataDTO {
-    private Integer followers_count;
-
     private Boolean followed_by;
+
+    private Integer followers_count;
 
     private String id;
 
     private String name;
 
+    private String screen_name;
+
     private String text;
 
     private String username;
-
-    private String screen_name;
-
-    public Integer getFollowersCount() {
-        return followers_count;
-    }
-
-    public String getScreenName() {
-        return screen_name;
-    }
-
-    public void setFollowers_count(Integer followersCount) {
-        this.followers_count = followersCount;
-    }
 
     public Boolean getFollowed_by() {
         return followed_by;
@@ -36,6 +24,10 @@ public class DataDTO {
 
     public void setFollowed_by(Boolean followed_by) {
         this.followed_by = followed_by;
+    }
+
+    public Integer getFollowersCount() {
+        return followers_count;
     }
 
     public String getId() {
@@ -54,12 +46,12 @@ public class DataDTO {
         this.name = name;
     }
 
-    public String getText() {
-        return text;
+    public String getScreenName() {
+        return screen_name;
     }
 
-    public void setScreen_name(String screen_name) {
-        this.screen_name = screen_name;
+    public String getText() {
+        return text;
     }
 
     public void setText(String text) {
@@ -72,5 +64,13 @@ public class DataDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setFollowers_count(Integer followersCount) {
+        this.followers_count = followersCount;
+    }
+
+    public void setScreen_name(String screen_name) {
+        this.screen_name = screen_name;
     }
 }

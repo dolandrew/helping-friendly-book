@@ -12,7 +12,6 @@ import java.util.Date;
 @EnableScheduling
 @Service
 public class Follower {
-
     private final GoogliTweeter googliTweeter;
 
     private final TwitterService twitterService;
@@ -28,14 +27,14 @@ public class Follower {
         this.twitterService = twitterService;
     }
 
-    @Scheduled(cron="${cron.follow}")
+    @Scheduled(cron = "${cron.follow}")
     public void follow() {
         googliTweeter.tweet("Following users who liked the last " + followedUserTweets + " tweet(s) for userId: " + followedUser + "...");
         try {
             ResponseEntity<TwitterResponseDTO> responseEntity = twitterService.getTweetsForUserId(followedUser);
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 Integer usersFollowed = 0;
-                for (int i = 0; i < followedUserTweets; i++ ) {
+                for (int i = 0; i < followedUserTweets; i++) {
                     usersFollowed += twitterService.followFavoritesById(responseEntity.getBody().getData().get(i).getId());
                 }
                 googliTweeter.tweet("PhishCompanion requested to follow " + usersFollowed + " users at " + new Date() + ".");

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GoogliTweeter {
-
     private static final Logger LOG = LoggerFactory.getLogger(GoogliTweeter.class);
 
     private final GoogliConfig creds;

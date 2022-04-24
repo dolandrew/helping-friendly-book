@@ -8,9 +8,6 @@ import org.springframework.stereotype.Component;
 public class StartupTweeter {
     private final GoogliTweeter googliTweeter;
 
-    @Value("${one.time.song}")
-    private String oneTimeSong;
-
     @Value("${bustout.threshold}")
     private Integer bustoutThreshold;
 
@@ -20,11 +17,14 @@ public class StartupTweeter {
     @Value("${ignored.song}")
     private String ignoredSong;
 
+    @Value("${one.time.song}")
+    private String oneTimeSong;
+
     public StartupTweeter(GoogliTweeter googliTweeter) {
         this.googliTweeter = googliTweeter;
     }
 
-//    @PostConstruct
+    //    @PostConstruct
     public void tweetPropertiesOnStartup() {
         String tweet = "HFB started successfully";
         if (bustoutThreshold != null) {
@@ -34,11 +34,10 @@ public class StartupTweeter {
             tweet += "\ncustom.hashtags=" + customHashtags;
         }
         if (StringUtils.isNotBlank(oneTimeSong)) {
-            tweet +=  "\none.time.song=" + oneTimeSong;
+            tweet += "\none.time.song=" + oneTimeSong;
         }
         if (StringUtils.isNotBlank(ignoredSong)) {
             tweet += "\nignored.song=" + ignoredSong;
-
         }
 
         googliTweeter.tweet(tweet);

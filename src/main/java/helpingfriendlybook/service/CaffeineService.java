@@ -8,12 +8,11 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class CaffeineService {
+    private static final String APP_NAME = "helping-friendly-book";
 
     private static final Logger LOG = LoggerFactory.getLogger(CaffeineService.class);
 
     private final RestTemplate restTemplate;
-
-    private static final String APP_NAME = "helping-friendly-book";
 
     public CaffeineService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;

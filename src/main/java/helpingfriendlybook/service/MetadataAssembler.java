@@ -11,14 +11,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class MetadataAssembler {
-
     private static final Logger LOG = LoggerFactory.getLogger(MetadataAssembler.class);
-
-    private final SongLoader songLoader;
 
     private final GoogliTweeter googliTweeter;
 
     private final OnThisDayService onThisDayService;
+
+    private final SongLoader songLoader;
 
     public MetadataAssembler(SongLoader songLoader, GoogliTweeter googliTweeter, OnThisDayService onThisDayService) {
         this.songLoader = songLoader;
@@ -62,7 +61,4 @@ public class MetadataAssembler {
         LOG.warn("Successfully assembled metadata for: " + songName + "");
         return songDTO;
     }
-
-
-
 }

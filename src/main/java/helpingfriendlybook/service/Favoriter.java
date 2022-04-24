@@ -17,29 +17,30 @@ import static helpingfriendlybook.service.TwitterService.getSomeHoursAgo;
 @EnableScheduling
 @Service
 public class Favoriter {
-
     private static final Logger LOG = LoggerFactory.getLogger(Favoriter.class);
+
+    private final List<String> checkedIds = new ArrayList<>();
 
     private final GoogliTweeter googliTweeter;
 
+    private final List<String> screenNamesToFavorite = List.of("PhishtoryToday", "secretcabdriver", "PhishatMSG", "PhishRT", "PhishJustJams", "StadiumTourLife", "LivePhish", "Phish");
+
     private final TwitterService twitterService;
 
-    @Value("${favoriter.max}")
-    private Integer maxTweetsLiked;
+    private final List<String> userIdsToFavorite = List.of("2237218753", "145023741", "2202143780", "1492957487888281607", "3378157977", "1441291459018121220", "232312841", "14503997");
 
     @Value("${favoriter.interval.hours}")
     private Integer intervalHours;
 
-    private final List<String> checkedIds = new ArrayList<>();
-    private final List<String> userIdsToFavorite = List.of("2237218753", "145023741", "2202143780", "1492957487888281607", "3378157977", "1441291459018121220", "232312841", "14503997");
-    private final List<String> screenNamesToFavorite = List.of("PhishtoryToday", "secretcabdriver", "PhishatMSG", "PhishRT", "PhishJustJams", "StadiumTourLife", "LivePhish", "Phish");
+    @Value("${favoriter.max}")
+    private Integer maxTweetsLiked;
 
     public Favoriter(GoogliTweeter googliTweeter, TwitterService twitterService) {
         this.googliTweeter = googliTweeter;
         this.twitterService = twitterService;
     }
 
-    @Scheduled(cron="${cron.favorite}")
+    @Scheduled(cron = "${cron.favorite}")
     public void listenToPhishFTR() {
         for (int i = 0; i < userIdsToFavorite.size(); i++) {
             int tweetsLiked = 0;
@@ -58,7 +59,7 @@ public class Favoriter {
                                 twitterService.favoriteTweetById(tweetId);
                                 tweetsLiked++;
                                 checkedIds.add(tweetId);
-                                googliTweeter.tweet("HFB liked " + screenNamesToFavorite.get(i) +  "'s tweet: \"" + tweet.getText() + "\"");
+                                googliTweeter.tweet("HFB liked " + screenNamesToFavorite.get(i) + "'s tweet: \"" + tweet.getText() + "\"");
                             }
                         }
                     } else {
