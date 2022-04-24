@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 
 @Service
@@ -99,9 +100,15 @@ public class TwitterService {
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
     }
 
-    public ResponseEntity<TwitterResponseDTO> getTweetsForUserIdInLastFiveMinutes(String userId) {
+    public ResponseEntity<TwitterResponseDTO> getTweetsForUserIdInLast(String userId, String timeframe) {
         LOG.warn("Checking for tweets...");
-        var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=retweets,replies&max_results=5&start_time=" + getFiveMinutesAgo();
+        var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=retweets,replies&max_results=5&start_time=" + timeframe;
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+    }
+
+    public ResponseEntity<TwitterResponseDTO> getTweetsAndRetweetsForUserIdInLast(String userId, String timeframe) {
+        LOG.warn("Checking for tweets...");
+        var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=replies&max_results=5&start_time=" + timeframe;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
     }
 
@@ -161,9 +168,14 @@ public class TwitterService {
                 creds.getAccessToken(), creds.getAccessTokenSecret(), null);
     }
 
-    private String getFiveMinutesAgo() {
+    public static String getOneMinuteAgo() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
         return ZonedDateTime.now(ZoneId.of("UTC")).minus(1, MINUTES).format(formatter);
+    }
+
+    public static String getSomeHoursAgo(int intervalHours) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
+        return ZonedDateTime.now(ZoneId.of("UTC")).minus(intervalHours, HOURS).format(formatter);
     }
 
     private HttpHeaders getHeaders() {

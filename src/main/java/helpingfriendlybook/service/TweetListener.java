@@ -11,6 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import static helpingfriendlybook.service.TwitterService.getOneMinuteAgo;
+
 @EnableScheduling
 @Service
 public class TweetListener {
@@ -46,7 +48,7 @@ public class TweetListener {
     @Scheduled(cron="${cron.listen}")
     public void listenToPhishFTR() {
         try {
-            var tweets = twitterService.getTweetsForUserIdInLastFiveMinutes(phishFTRid);
+            var tweets = twitterService.getTweetsForUserIdInLast(phishFTRid, getOneMinuteAgo());
             String songName = processIncomingTweet(tweets);
             if (songName != null) {
                 if (songName.equals(ignoredSong)) {
