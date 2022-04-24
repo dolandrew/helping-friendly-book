@@ -28,10 +28,10 @@ public class TweetWriter {
             if (songDTO.getGap() > bustoutThreshold) {
                 tweet = "BUSTOUT: ";
             }
-            tweet += songDTO.getName() + " has been played " + songDTO.getTimes() + " times" +
+            tweet += count(songDTO.getTimes() + 1) + " " + songDTO.getName() +
                     "\nLast played: " + songDTO.getLastPlayed() +
                     "\nGap: " + songDTO.getGap() +
-                    "\nFirst played on " + songDTO.getDebut() +
+                    "\nFirst played: " + songDTO.getDebut() +
                     "\n" + songDTO.getLink();
         }
 
@@ -39,6 +39,18 @@ public class TweetWriter {
         LOG.warn("Created tweet: " + tweetWithHashtags);
 
         return tweetWithHashtags;
+    }
+
+    private String count(int times) {
+        if (times % 10 == 1) {
+            return times + "st";
+        } else if (times % 10 == 2) {
+            return times + "nd";
+        } else if (times % 10 == 3) {
+            return times + "rd";
+        } else {
+            return times + "th";
+        }
     }
 
     public String addSongHashtags(String tweet) {
