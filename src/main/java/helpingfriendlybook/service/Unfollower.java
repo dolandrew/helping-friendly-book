@@ -70,7 +70,7 @@ public class Unfollower {
     }
 
     private void tweetUnfollowed(List<String> unfollowed) {
-        googliTweeter.tweet("PhishCompanion unfollowed " + String.join(", ", unfollowed) + " (<" + followerThreshold + " followers)");
+        googliTweeter.tweet(".@PhishCompanion unfollowed @" + String.join(", @", unfollowed) + " (< " + followerThreshold + " followers)");
     }
 
     private void tweetUnfollowedBatch(List<String> unfollowed) {
