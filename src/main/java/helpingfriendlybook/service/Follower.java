@@ -37,7 +37,7 @@ public class Follower {
                 for (int i = 0; i < followedUserTweets; i++) {
                     usersFollowed += twitterService.followFavoritesById(responseEntity.getBody().getData().get(i).getId());
                 }
-                googliTweeter.tweet("PhishCompanion requested to follow " + usersFollowed + " users at " + new Date() + ".");
+                googliTweeter.tweet(".@PhishCompanion requested to follow " + usersFollowed + " users at " + new Date() + ".");
             } else {
                 googliTweeter.tweet("HFB was unable to fetch tweets!");
             }

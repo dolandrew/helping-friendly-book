@@ -24,7 +24,7 @@ public class Favoriter {
     private final GoogliTweeter googliTweeter;
 
     private final List<String> screenNamesToFavorite = List.of("PhishtoryToday", "secretcabdriver", "PhishatMSG", "PhishRT", "PhishJustJams", "StadiumTourLife", "LivePhish", "Phish");
-
+        //YEMBlog
     private final TwitterService twitterService;
 
     private final List<String> userIdsToFavorite = List.of("2237218753", "145023741", "2202143780", "1492957487888281607", "3378157977", "1441291459018121220", "232312841", "14503997");
@@ -41,7 +41,7 @@ public class Favoriter {
     }
 
     @Scheduled(cron = "${cron.favorite}")
-    public void listenToPhishFTR() {
+    public void favorite() {
         for (int i = 0; i < userIdsToFavorite.size(); i++) {
             int tweetsLiked = 0;
             try {
@@ -59,7 +59,7 @@ public class Favoriter {
                                 twitterService.favoriteTweetById(tweetId);
                                 tweetsLiked++;
                                 checkedIds.add(tweetId);
-                                googliTweeter.tweet("HFB liked " + screenNamesToFavorite.get(i) + "'s tweet: \"" + tweet.getText() + "\"");
+                                googliTweeter.tweet(".@PhishCompanion liked @" + screenNamesToFavorite.get(i) + "'s tweet: \"" + tweet.getText() + "\"");
                             }
                         }
                     } else {
