@@ -23,17 +23,19 @@ public class Favoriter {
 
     private final GoogliTweeter googliTweeter;
 
-    private final List<String> screenNamesToFavorite = List.of("PhishtoryToday", "secretcabdriver", "PhishatMSG", "PhishRT", "PhishJustJams", "StadiumTourLife", "LivePhish", "Phish");
+    private final List<String> screenNamesToFavorite = List.of("PhishtoryToday", "YEMBlog", "PhishatMSG", "PhishRT", "PhishJustJams", "StadiumTourLife", "LivePhish", "Phish");
         //YEMBlog
     private final TwitterService twitterService;
 
-    private final List<String> userIdsToFavorite = List.of("2237218753", "145023741", "2202143780", "1492957487888281607", "3378157977", "1441291459018121220", "232312841", "14503997");
+    private final List<String> userIdsToFavorite = List.of("2237218753", "16518086", "2202143780", "1492957487888281607", "3378157977", "1441291459018121220", "232312841", "14503997");
 
     @Value("${favoriter.interval.hours}")
     private Integer intervalHours;
 
     @Value("${favoriter.max}")
     private Integer maxTweetsLiked;
+
+    private int index = 1;
 
     public Favoriter(GoogliTweeter googliTweeter, TwitterService twitterService) {
         this.googliTweeter = googliTweeter;
@@ -42,7 +44,9 @@ public class Favoriter {
 
     @Scheduled(cron = "${cron.favorite}")
     public void favorite() {
-        for (int i = 0; i < userIdsToFavorite.size(); i++) {
+        int tries = 0;
+        for (int i = index; i < userIdsToFavorite.size(); i++) {
+            tries++;
             int tweetsLiked = 0;
             try {
                 var tweets = twitterService.getTweetsAndRetweetsForUserIdInLast(userIdsToFavorite.get(i), getSomeHoursAgo(intervalHours));
@@ -68,6 +72,10 @@ public class Favoriter {
                 }
             } catch (Exception e) {
                 googliTweeter.tweet("HFB caught exception: " + e.getMessage());
+            }
+            index = (i + 1) % userIdsToFavorite.size();
+            if (tweetsLiked > 0 || tries == userIdsToFavorite.size()) {
+                break;
             }
         }
     }
