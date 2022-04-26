@@ -35,7 +35,7 @@ public class Favoriter {
     @Value("${favoriter.max}")
     private Integer maxTweetsLiked;
 
-    private int index = 1;
+    private int index = 2;
 
     public Favoriter(GoogliTweeter googliTweeter, TwitterService twitterService) {
         this.googliTweeter = googliTweeter;
