@@ -34,11 +34,8 @@ public class TweetWriter {
 
         String tweet = "";
         if (songDTO.getTimes() == 0) {
-            tweet = "DEBUT: " + songDTO.getName();
+            tweet = songDTO.getName();
         } else {
-            if (songDTO.getGap() > bustoutThreshold) {
-                tweet = "BUSTOUT: ";
-            }
             tweet += count(songDTO.getTimes() + 1) + " " + songDTO.getName() +
                     "\nLast played: " + songDTO.getLastPlayed() +
                     "\nGap: " + songDTO.getGap() +
@@ -47,12 +44,24 @@ public class TweetWriter {
         }
 
         String tweetWithHashtags = addSongHashtags(tweet);
+        if (songDTO.getGap() > bustoutThreshold) {
+            tweetWithHashtags = "#bustout";
+        }
         LOG.warn("Created tweet: " + tweetWithHashtags);
 
         return tweetWithHashtags;
     }
 
     private String count(int times) {
+        if (("" + times).endsWith("11")) {
+            return times + "th";
+        }
+        if (("" + times).endsWith("12")) {
+            return times + "th";
+        }
+        if (("" + times).endsWith("13")) {
+            return times + "th";
+        }
         if (times % 10 == 1) {
             return times + "st";
         } else if (times % 10 == 2) {
