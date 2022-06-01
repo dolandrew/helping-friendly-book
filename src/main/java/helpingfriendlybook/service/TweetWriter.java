@@ -44,8 +44,10 @@ public class TweetWriter {
         }
 
         String tweetWithHashtags = addSongHashtags(tweet);
-        if (songDTO.getGap() > bustoutThreshold) {
-            tweetWithHashtags = "#bustout";
+        if (songDTO.getTimes() == 0) {
+            tweetWithHashtags += " #debut";
+        } else if (songDTO.getGap() > bustoutThreshold) {
+            tweetWithHashtags += " #bustout";
         }
         LOG.warn("Created tweet: " + tweetWithHashtags);
 

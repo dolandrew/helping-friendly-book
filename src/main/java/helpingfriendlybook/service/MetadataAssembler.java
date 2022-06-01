@@ -39,7 +39,7 @@ public class MetadataAssembler {
                 googliTweeter.tweet(message);
                 return assembleMetadata(fetchedSong.getAliasOf());
             }
-            if (fetchedSong.getLastPlayed() != null) {
+            if (fetchedSong.getLastPlayed() != null && !fetchedSong.getLastPlayed().equals("—")) {
                 String[] dateParts = fetchedSong.getLastPlayed().split("-");
                 Element show = onThisDayService.getRandomShowForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
                 String venue = onThisDayService.getVenueOfShow(show);
@@ -49,7 +49,7 @@ public class MetadataAssembler {
             songDTO.setGap(fetchedSong.getGap());
             songDTO.setLink(fetchedSong.getLink());
             songDTO.setTimes(fetchedSong.getTimes());
-            if (fetchedSong.getDebut() != null) {
+            if (fetchedSong.getDebut() != null && !fetchedSong.getDebut().equals("—")) {
                 String[] dateParts = fetchedSong.getDebut().split("-");
                 Element show = onThisDayService.getRandomShowForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
                 String venue = onThisDayService.getVenueOfShow(show);
