@@ -11,7 +11,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
+
 import static helpingfriendlybook.service.TwitterService.getOneMinuteAgo;
+import static java.lang.Integer.parseInt;
 
 @EnableScheduling
 @Service
@@ -37,11 +40,15 @@ public class TweetListener {
     @Value("${twitter.phish.ftr.id}")
     private String phishFTRid;
 
-    public TweetListener(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter, TwitterService twitterService) {
+    private final TimeApiService timeApiService;
+
+    public TweetListener(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter,
+                         TwitterService twitterService, TimeApiService timeApiService) {
         this.metadataAssembler = metadataAssembler;
         this.tweetWriter = tweetWriter;
         this.googliTweeter = googliTweeter;
         this.twitterService = twitterService;
+        this.timeApiService = timeApiService;
     }
 
     @Scheduled(cron = "${cron.listen}")
@@ -61,7 +68,7 @@ public class TweetListener {
         }
     }
 
-    private String cleanSongName(String fetchedSongName) {
+    public static String cleanSongName(String fetchedSongName) {
         return fetchedSongName
                 .replaceAll("&gt; ", "")
                 .replaceAll("&gt;", "")
@@ -92,6 +99,11 @@ public class TweetListener {
                 twitterService.favoriteTweetById(tweetId);
                 if (shouldIgnoreTweet(fetchedSongName)) {
                     return null;
+                }
+                try {
+                    checkForSetStart(fetchedSongName);
+                } catch (Exception e) {
+                    googliTweeter.tweet("Failed to tweet set start!");
                 }
             } else {
                 LOG.warn("HFB found no tweets in given time period.");
@@ -128,5 +140,25 @@ public class TweetListener {
             return true;
         }
         return false;
+    }
+
+    public void checkForSetStart(String tweet) {
+        if (tweet.contains("SET ONE:") || tweet.toLowerCase(Locale.ROOT).contains("set one:")) {
+            tweetSetStart("SET ONE", "\uD83C\uDF89");
+        } else if (tweet.contains("SET TWO:") || tweet.toLowerCase(Locale.ROOT).contains("set two:")) {
+            tweetSetStart("SET TWO", "\uD83D\uDC20");
+        } else if (tweet.contains("SET THREE:") || tweet.toLowerCase(Locale.ROOT).contains("set three:")) {
+            tweetSetStart("SET THREE", "\uD83D\uDD7A");
+        } else if (tweet.contains("ENCORE:") || tweet.toLowerCase(Locale.ROOT).contains("encore:")) {
+            tweetSetStart("ENCORE", "⭕️");
+        }
+    }
+
+    private void tweetSetStart(String setName, String emoji) {
+        String timeInNewYork = timeApiService.getTimeInNewYork();
+        String[] timeParts = timeInNewYork.split(":");
+        int hour = parseInt(timeParts[0]) % 12;
+        if (hour ==0) hour = 12;
+        twitterService.tweet(emoji + " " + setName + " started at " + hour + ":" + timeParts[1] + (parseInt(timeParts[0]) >= 12 ? " PM" : " AM") + " ET");
     }
 }

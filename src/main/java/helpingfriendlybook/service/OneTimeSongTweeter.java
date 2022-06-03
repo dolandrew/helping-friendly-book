@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
+import static helpingfriendlybook.service.TweetListener.cleanSongName;
+
 @Service
 public class OneTimeSongTweeter {
     private static final Logger LOG = LoggerFactory.getLogger(OneTimeSongTweeter.class);
@@ -24,25 +26,34 @@ public class OneTimeSongTweeter {
 
     private final TwitterService twitterService;
 
+    private final TweetListener tweetListener;
+
     @Value("${bustout.threshold}")
     private Integer bustoutThreshold;
 
     @Value("${one.time.song}")
     private String oneTimeSong;
 
-    public OneTimeSongTweeter(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter, TwitterService twitterService, Environment environment) {
+    public OneTimeSongTweeter(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter, TwitterService twitterService, Environment environment, TweetListener tweetListener) {
         this.metadataAssembler = metadataAssembler;
         this.tweetWriter = tweetWriter;
         this.googliTweeter = googliTweeter;
         this.twitterService = twitterService;
         this.environment = environment;
+        this.tweetListener = tweetListener;
     }
 
     @PostConstruct
     public void oneTimeSong() {
         if (StringUtils.isNotBlank(oneTimeSong)) {
             googliTweeter.tweet("Found one time song: " + oneTimeSong);
-            SongDTO songDTO = metadataAssembler.assembleMetadata(oneTimeSong);
+            try {
+                tweetListener.checkForSetStart(oneTimeSong);
+            } catch (Exception e) {
+                googliTweeter.tweet("Failed to tweet set start!");
+            }
+            String oneTimeSongCleaned = cleanSongName(oneTimeSong);
+            SongDTO songDTO = metadataAssembler.assembleMetadata(oneTimeSongCleaned);
             String tweet = tweetWriter.writeTweet(songDTO, bustoutThreshold);
             if (localEnvironment()) {
                 LOG.warn("Would have tweeted: " + tweet);

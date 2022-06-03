@@ -199,8 +199,9 @@ public class TwitterService {
                 if (tweet != null) {
                     LOG.warn("Would have tweeted: " + tweet);
                 }
+            } else {
+                httpClient.execute(httpPost);
             }
-            httpClient.execute(httpPost);
             if (successMessage != null) {
                 LOG.warn(successMessage);
             }

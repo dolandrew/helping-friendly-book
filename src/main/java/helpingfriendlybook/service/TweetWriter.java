@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
-
 @Service
 public class TweetWriter {
     private static final Logger LOG = LoggerFactory.getLogger(TweetWriter.class);
@@ -15,12 +13,8 @@ public class TweetWriter {
     @Value("${custom.hashtags}")
     private String customHashtags;
 
-    public String addRandomShowHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #randomshow";
-    }
-
     public String addShowHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion #livephish #otd" + OffsetDateTime.now().getYear();
+        return tweet + "\n\n#phish #phishstats #phishcompanion";
     }
 
     public String addSongHashtags(String tweet) {
@@ -44,9 +38,7 @@ public class TweetWriter {
         }
 
         String tweetWithHashtags = addSongHashtags(tweet);
-        if (songDTO.getTimes() == 0) {
-            tweetWithHashtags += " #debut";
-        } else if (songDTO.getGap() > bustoutThreshold) {
+        if (songDTO.getGap() > bustoutThreshold) {
             tweetWithHashtags += " #bustout";
         }
         LOG.warn("Created tweet: " + tweetWithHashtags);
