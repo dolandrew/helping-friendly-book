@@ -72,6 +72,8 @@ public class TweetListener {
         return fetchedSongName
                 .replaceAll("&gt; ", "")
                 .replaceAll("&gt;", "")
+                .replaceAll("> ", "")
+                .replaceAll(">", "")
                 .replaceAll("SET ONE: ", "")
                 .replaceAll("SET TWO: ", "")
                 .replaceAll("SET THREE: ", "")
@@ -129,6 +131,7 @@ public class TweetListener {
         }
         if (fetchedSongName.contains("\uD83D\uDCF8")
                 || fetchedSongName.contains("@rene_huemer")
+                || fetchedSongName.contains(">>")
                 || fetchedSongName.contains("https://t.co")
                 || fetchedSongName.matches(".*[0-9]+/[0-9]+/[0-9]{4}.*")
         ) {

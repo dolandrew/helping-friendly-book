@@ -26,11 +26,12 @@ public class MetadataAssembler {
     }
 
     public SongDTO assembleMetadata(String songName) {
-        LOG.warn("Assembling metadata for: " + songName);
+        String cleanedSongName = songName.replaceAll("\\(|\\)|,", "");
+        LOG.warn("Assembling metadata for: " + cleanedSongName);
         SongDTO songDTO = new SongDTO();
-        songDTO.setName(songName);
+        songDTO.setName(cleanedSongName);
         List<SongDTO> currentSongDTOList = songLoader.getSongs().stream()
-                .filter(song -> song.getNameLower().equals(songName.toLowerCase()))
+                .filter(song -> song.getNameLower().replaceAll("\\(|\\)|,", "").equals(cleanedSongName.toLowerCase()))
                 .collect(Collectors.toList());
         if (!currentSongDTOList.isEmpty()) {
             SongDTO fetchedSong = currentSongDTOList.get(0);
@@ -56,9 +57,9 @@ public class MetadataAssembler {
                 songDTO.setDebut(fetchedSong.getDebut() + " at " + venue);
             }
         } else {
-            googliTweeter.tweet("HFB tried to assemble metadata for " + songName + " but found no results. Assuming this is a debut.");
+            googliTweeter.tweet("HFB tried to assemble metadata for " + cleanedSongName + " but found no results. Assuming this is a debut.");
         }
-        LOG.warn("Successfully assembled metadata for: " + songName + "");
+        LOG.warn("Successfully assembled metadata for: " + cleanedSongName + "");
         return songDTO;
     }
 }
