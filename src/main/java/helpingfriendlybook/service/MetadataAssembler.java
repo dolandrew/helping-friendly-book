@@ -42,8 +42,8 @@ public class MetadataAssembler {
             }
             if (fetchedSong.getLastPlayed() != null && !fetchedSong.getLastPlayed().equals("—")) {
                 String[] dateParts = fetchedSong.getLastPlayed().split("-");
-                Element show = onThisDayService.getRandomShowForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
-                String venue = onThisDayService.getVenueOfShow(show);
+                List<Element> shows = onThisDayService.getShowsForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
+                String venue = onThisDayService.getVenueOfShow(shows.get(0));
                 songDTO.setLastPlayed(fetchedSong.getLastPlayed() + " at " + venue);
             }
             songDTO.setName(fetchedSong.getName());
@@ -52,8 +52,8 @@ public class MetadataAssembler {
             songDTO.setTimes(fetchedSong.getTimes());
             if (fetchedSong.getDebut() != null && !fetchedSong.getDebut().equals("—")) {
                 String[] dateParts = fetchedSong.getDebut().split("-");
-                Element show = onThisDayService.getRandomShowForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
-                String venue = onThisDayService.getVenueOfShow(show);
+                List<Element> shows = onThisDayService.getShowsForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
+                String venue = onThisDayService.getVenueOfShow(shows.get(0));
                 songDTO.setDebut(fetchedSong.getDebut() + " at " + venue);
             }
         } else {
