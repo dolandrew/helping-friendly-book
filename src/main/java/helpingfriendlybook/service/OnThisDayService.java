@@ -1,11 +1,15 @@
 package helpingfriendlybook.service;
 
+import helpingfriendlybook.dto.TweetResponseDTO;
 import org.apache.commons.lang3.text.WordUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +21,7 @@ import java.util.List;
 import java.util.Random;
 
 import static java.util.Collections.emptyList;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
@@ -41,11 +46,63 @@ public class OnThisDayService {
         this.tweetWriter = tweetWriter;
     }
 
+    public String getSetlist(Element element) {
+        Element setlistBody = element.getElementsByClass("setlist-body").get(0);
+        List<Element> sets = setlistBody.getElementsByClass("set-label");
+        String setlist = "";
+        if ("SET 1".equals(sets.get(0).wholeText())) {
+            List<Element> songs = sets.get(0).parent().getElementsByClass("setlist-song");
+            setlist += "Set 1: ";
+            for (Element song : songs) {
+                setlist += song.wholeText() + ", ";
+            }
+            setlist = setlist.substring(0, setlist.length() - 2);
+        }
+        if (sets.size() > 1 && "SET 2".equals(sets.get(1).wholeText())) {
+            List<Element> songs = sets.get(1).parent().getElementsByClass("setlist-song");
+            setlist += "\nSet 2: ";
+            for (Element song : songs) {
+                setlist += song.wholeText() + ", ";
+            }
+            setlist = setlist.substring(0, setlist.length() - 2);
+        } else if (sets.size() > 1 && "ENCORE".equals(sets.get(1).wholeText())) {
+            List<Element> songs = sets.get(1).parent().getElementsByClass("setlist-song");
+            setlist += "\nEncore: ";
+            for (Element song : songs) {
+                setlist += song.wholeText() + ", ";
+            }
+            setlist = setlist.substring(0, setlist.length() - 2);
+        }
+        if (sets.size() > 2 && "SET 3".equals(sets.get(2).wholeText())) {
+            List<Element> songs = sets.get(2).parent().getElementsByClass("setlist-song");
+            setlist += "\nSet 3: ";
+            for (Element song : songs) {
+                setlist += song.wholeText() + ", ";
+            }
+            setlist = setlist.substring(0, setlist.length() - 2);
+        } else if (sets.size() > 2 && "ENCORE".equals(sets.get(2).wholeText())) {
+            List<Element> songs = sets.get(2).parent().getElementsByClass("setlist-song");
+            setlist += "\nEncore: ";
+            for (Element song : songs) {
+                setlist += song.wholeText() + ", ";
+            }
+            setlist = setlist.substring(0, setlist.length() - 2);
+        }
+        if (sets.size() > 3 && "ENCORE".equals(sets.get(3).wholeText())) {
+            List<Element> songs = sets.get(3).parent().getElementsByClass("setlist-song");
+            setlist += "\nEncore: ";
+            for (Element song : songs) {
+                setlist += song.wholeText() + ", ";
+            }
+            setlist = setlist.substring(0, setlist.length() - 2);
+        }
+        return setlist;
+    }
+
     public List<Element> getShowsForDate(Integer day, Integer month, Integer year) {
         LOG.warn("Looking for shows on " + month + "-" + day + "...");
         String url = "https://phish.net/setlists/?month=" + month + "&day=" + day + (year != null ? "&year=" + year : "");
-        String response = restTemplate.getForObject(url, String.class);
-        List<Element> shows = getShowsFromResponse(response);
+        List<Element> shows = getShowsWithAbbreviatedSetlists(url);
         LOG.warn("HFB found " + shows.size() + " shows on " + (year != null ? year + "-" : "") + month + "-" + day + ".");
         return shows;
     }
@@ -102,6 +159,11 @@ public class OnThisDayService {
         return tweet;
     }
 
+    private String getSetlistNotes(Element element) {
+        String setlistNotes = element.getElementsByClass("setlist-notes").get(0).wholeText();
+        return setlistNotes.replace("NBSP", "").replace("\n", "").replace("\t", "").replace("\r", "");
+    }
+
     private List<Element> getShowsFromResponse(String response) {
         Document doc = Jsoup.parse(response);
         int setlists = doc.getElementsByClass("setlist").size();
@@ -113,6 +175,14 @@ public class OnThisDayService {
         return doc.getElementsByClass("setlist");
     }
 
+    private List<Element> getShowsWithAbbreviatedSetlists(String url) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Cookie", " songabbr=on; ");
+        HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(httpHeaders);
+        ResponseEntity<String> response = restTemplate.exchange(url, GET, requestEntity, String.class);
+        return getShowsFromResponse(response.getBody());
+    }
+
     private void tweetOnThisDay(Element show, ZonedDateTime today, int size) {
         LOG.warn("Tweeting OnThisDay...");
         String tweet = "#OnThisDay\n";
@@ -122,8 +192,7 @@ public class OnThisDayService {
     private void tweetRandomShow() {
         LOG.warn("Tweeting a random setlist...");
         String url = "https://phish.net/setlists/jump/random";
-        String response = restTemplate.getForObject(url, String.class);
-        Element show = getShowsFromResponse(response).get(0);
+        Element show = getShowsWithAbbreviatedSetlists(url).get(0);
         String tweet = "#RandomShow\n";
         tweetTheShow(show, null, 1, tweet);
     }
@@ -134,11 +203,15 @@ public class OnThisDayService {
         tweet = addLocation(show, tweet);
         tweet = addLink(show, tweet);
         // TODO: add link to relisten, phish'n, phishtracks
-        if (setlists > 1) {
-            tweet = addTotalShows(setlists, today, tweet);
-        }
+//        if (setlists > 1) {
+//            tweet = addTotalShows(setlists, today, tweet);
+//        }
         tweet = tweetWriter.addShowHashtags(tweet);
 
-        twitterService.tweet(tweet);
+        TweetResponseDTO tweetResponseDTO = twitterService.tweet(tweet);
+
+        tweetResponseDTO = twitterService.tweet(getSetlist(show), tweetResponseDTO.getId());
+
+        twitterService.tweet(getSetlistNotes(show), tweetResponseDTO.getId());
     }
 }

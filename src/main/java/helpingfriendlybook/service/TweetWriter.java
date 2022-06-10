@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+
 @Service
 public class TweetWriter {
     private static final Logger LOG = LoggerFactory.getLogger(TweetWriter.class);
@@ -14,7 +16,7 @@ public class TweetWriter {
     private String customHashtags;
 
     public String addShowHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion";
+        return tweet + "\n\n#phish #phishcompanion #otd" + OffsetDateTime.now().getYear();
     }
 
     public String addSongHashtags(String tweet) {

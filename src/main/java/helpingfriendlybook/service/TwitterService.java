@@ -1,15 +1,19 @@
 package helpingfriendlybook.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import helpingfriendlybook.config.HFBConfig;
 import helpingfriendlybook.dto.DataDTO;
 import helpingfriendlybook.dto.FriendshipDTO;
+import helpingfriendlybook.dto.TweetResponseDTO;
 import helpingfriendlybook.dto.TwitterResponseDTO;
 import helpingfriendlybook.dto.TwitterUsersResponseDTO;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -41,10 +45,13 @@ public class TwitterService {
 
     private final RestTemplate restTemplate;
 
-    public TwitterService(RestTemplate restTemplate, Environment environment, HFBConfig creds) {
+    private final ObjectMapper objectMapper;
+
+    public TwitterService(RestTemplate restTemplate, Environment environment, HFBConfig creds, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.environment = environment;
         this.creds = creds;
+        this.objectMapper = objectMapper;
     }
 
     public static String getOneMinuteAgo() {
@@ -62,8 +69,7 @@ public class TwitterService {
         String successMessage = "Successfully liked tweet.";
         String failureMessage = "Error trying to like tweet.";
 
-        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
-                creds.getAccessToken(), creds.getAccessTokenSecret(), null);
+        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(), creds.getAccessToken(), creds.getAccessTokenSecret(), null);
     }
 
     public Integer followFavoritesById(String tweetId) {
@@ -142,17 +148,34 @@ public class TwitterService {
         post(url, null, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, tweet);
     }
 
-    public void tweet(String tweet) {
+    public TweetResponseDTO tweet(String tweet, Long inReplyTo) {
+        if (tweet.length() > 280) {
+            String restOfTweet = tweet.substring(280);
+            String firstPart = tweet.substring(0, 280);
+            inReplyTo = tweet(firstPart, inReplyTo).getId();
+            inReplyTo = tweet(restOfTweet, inReplyTo).getId();
+        }
         if (tweet == null) {
-            return;
+            return null;
         }
         String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
         String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
+        if (inReplyTo != null) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
+            url += "&in_reply_to_status_id=" + inReplyTo;
+        }
         String successMessage = "Tweeted: \"" + encodedTweet + "\".";
         String failureMessage = "Error trying to tweet: \"" + encodedTweet + "\".";
 
-        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
+        return post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
                 creds.getAccessToken(), creds.getAccessTokenSecret(), tweet);
+    }
+
+    public TweetResponseDTO tweet(String tweet) {
+        return tweet(tweet, null);
     }
 
     public void unfollow(DataDTO user) {
@@ -174,8 +197,7 @@ public class TwitterService {
         String successMessage = "Successfully followed user with id: " + userId;
         String failureMessage = "Error trying to follow user with id: " + userId;
 
-        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
-                creds.getAccessToken(), creds.getAccessTokenSecret(), null);
+        post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(), creds.getAccessToken(), creds.getAccessTokenSecret(), null);
     }
 
     private HttpHeaders getHeaders() {
@@ -188,7 +210,7 @@ public class TwitterService {
         return environment.getActiveProfiles().length > 0 && environment.getActiveProfiles()[0].equals("local");
     }
 
-    private void post(String url, String successMessage, String failureMessage, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret, String tweet) {
+    private TweetResponseDTO post(String url, String successMessage, String failureMessage, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret, String tweet) {
         try {
             OAuthConsumer oAuthConsumer = new CommonsHttpOAuthConsumer(apiKey, apiKeySecret);
             oAuthConsumer.setTokenWithSecret(accessToken, accessTokenSecret);
@@ -200,7 +222,8 @@ public class TwitterService {
                     LOG.warn("Would have tweeted: " + tweet);
                 }
             } else {
-                httpClient.execute(httpPost);
+                HttpResponse response = httpClient.execute(httpPost);
+                return objectMapper.readValue(EntityUtils.toString(response.getEntity()), TweetResponseDTO.class);
             }
             if (successMessage != null) {
                 LOG.warn(successMessage);
@@ -208,5 +231,6 @@ public class TwitterService {
         } catch (Exception e) {
             LOG.error(failureMessage, e);
         }
+        return null;
     }
 }
