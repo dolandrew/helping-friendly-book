@@ -51,51 +51,31 @@ public class OnThisDayService {
         List<Element> sets = setlistBody.getElementsByClass("set-label");
         String setlist = "";
         if ("SET 1".equals(sets.get(0).wholeText())) {
-            List<Element> songs = sets.get(0).parent().getElementsByClass("setlist-song");
-            setlist += "Set 1: ";
-            for (Element song : songs) {
-                setlist += song.wholeText() + ", ";
-            }
-            setlist = setlist.substring(0, setlist.length() - 2);
+            setlist = getSetlistSet(sets, 0, setlist, "Set 1: ");
         }
         if (sets.size() > 1 && "SET 2".equals(sets.get(1).wholeText())) {
-            List<Element> songs = sets.get(1).parent().getElementsByClass("setlist-song");
-            setlist += "\nSet 2: ";
-            for (Element song : songs) {
-                setlist += song.wholeText() + ", ";
-            }
-            setlist = setlist.substring(0, setlist.length() - 2);
+            setlist = getSetlistSet(sets, 1, setlist, "\nSet 2: ");
         } else if (sets.size() > 1 && "ENCORE".equals(sets.get(1).wholeText())) {
-            List<Element> songs = sets.get(1).parent().getElementsByClass("setlist-song");
-            setlist += "\nEncore: ";
-            for (Element song : songs) {
-                setlist += song.wholeText() + ", ";
-            }
-            setlist = setlist.substring(0, setlist.length() - 2);
+            setlist = getSetlistSet(sets, 1, setlist, "\nEncore: ");
         }
         if (sets.size() > 2 && "SET 3".equals(sets.get(2).wholeText())) {
-            List<Element> songs = sets.get(2).parent().getElementsByClass("setlist-song");
-            setlist += "\nSet 3: ";
-            for (Element song : songs) {
-                setlist += song.wholeText() + ", ";
-            }
-            setlist = setlist.substring(0, setlist.length() - 2);
+            setlist = getSetlistSet(sets, 2, setlist, "\nSet 3: ");
         } else if (sets.size() > 2 && "ENCORE".equals(sets.get(2).wholeText())) {
-            List<Element> songs = sets.get(2).parent().getElementsByClass("setlist-song");
-            setlist += "\nEncore: ";
-            for (Element song : songs) {
-                setlist += song.wholeText() + ", ";
-            }
-            setlist = setlist.substring(0, setlist.length() - 2);
+            setlist = getSetlistSet(sets, 2, setlist, "\nEncore: ");
         }
         if (sets.size() > 3 && "ENCORE".equals(sets.get(3).wholeText())) {
-            List<Element> songs = sets.get(3).parent().getElementsByClass("setlist-song");
-            setlist += "\nEncore: ";
-            for (Element song : songs) {
-                setlist += song.wholeText() + ", ";
-            }
-            setlist = setlist.substring(0, setlist.length() - 2);
+            setlist = getSetlistSet(sets, 3, setlist, "\nEncore: ");
         }
+        return setlist;
+    }
+
+    private String getSetlistSet(List<Element> sets, int index, String setlist, String setlist1) {
+        List<Element> songs = sets.get(index).parent().getElementsByClass("setlist-song");
+        setlist += setlist1;
+        for (Element song : songs) {
+            setlist += song.wholeText() + ", ";
+        }
+        setlist = setlist.substring(0, setlist.length() - 2);
         return setlist;
     }
 
@@ -161,7 +141,35 @@ public class OnThisDayService {
 
     private String getSetlistNotes(Element element) {
         String setlistNotes = element.getElementsByClass("setlist-notes").get(0).wholeText();
-        return setlistNotes.replace("NBSP", "").replace("\n", "").replace("\t", "").replace("\r", "");
+        return setlistNotes.replace("NBSP", "")
+                .replace("\n", "")
+                .replace("\t", "")
+                .replace(" and ", " & ")
+                .replace(" first ", " 1st ")
+                .replace(" second ", " 2nd ")
+                .replace(" third ", " 3rd ")
+                .replace(" seven ", " 7 ")
+                .replace(" three ", " 3 ")
+                .replace(" eight ", " 8 ")
+                .replace(" without ", " w/o ")
+                .replace(" including ", " incl. ")
+                .replace(" September ", " Sept. ")
+                .replace(" October ", " Oct. ")
+                .replace(" November ", " Nov. ")
+                .replace(" December ", " Dec. ")
+                .replace(" January ", " Jan. ")
+                .replace(" February ", " Feb. ")
+                .replace(" August ", " Aug. ")
+                .replace(" unfinished ", " unf. ")
+                .replace(" unfinished.", " unf.")
+                .replace(" You Enjoy Myself ", " YEM ")
+                .replace(" Down With Disease ", " DwD ")
+                .replace(" Down with Disease ", " DwD ")
+                .replace(" I Didn't Know ", " IDK ")
+                .replace(" Backwards Down the Number Line ", " BDTNL ")
+                .replace(" Backwards Down The Number Line ", " BDTNL ")
+                .replace(" Wading in the Velvet Sea ", " Wading ")
+                .replace("\r", "");
     }
 
     private List<Element> getShowsFromResponse(String response) {
