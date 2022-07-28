@@ -1,8 +1,10 @@
 # Helping Friendly Book
 
-twitter.com/PhishCompanion
+www.twitter.com/PhishCompanion
 
-Helping Friendly Book is a Java Spring Boot application deployed to Heroku that runs the Helping Friendly Bot (@PhishCompanion) account on Twitter.
+The Helping Friendly Book is a Java Spring Boot application deployed to Heroku that runs the Helping Friendly Bot (@PhishCompanion) account on Twitter.
+
+![IMG_2115](https://user-images.githubusercontent.com/28452598/181653852-cf85cb39-95fc-4c61-9a75-d22c48362f0f.PNG)
 
 The Helping Friendly Bot does 3 main things:
 
