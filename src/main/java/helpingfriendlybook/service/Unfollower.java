@@ -46,7 +46,6 @@ public class Unfollower {
             List<String> followers = twitterService.getFollowersList(myUserName).stream().map(DataDTO::getScreenName).collect(toList());
             LOG.warn("Ratio: " + (followers.size() / friends.size()));
 
-
             for (String friend : friends) {
                 if (showUserRequests == maxShowUserRequests) {
                     LOG.warn("Reached max show user requests " + "(" + maxShowUserRequests + ")");

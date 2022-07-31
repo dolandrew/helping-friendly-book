@@ -3,7 +3,6 @@ package helpingfriendlybook.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import helpingfriendlybook.config.HFBConfig;
 import helpingfriendlybook.dto.DataDTO;
-import helpingfriendlybook.dto.FriendshipDTO;
 import helpingfriendlybook.dto.TweetResponseDTO;
 import helpingfriendlybook.dto.TwitterResponseDTO;
 import helpingfriendlybook.dto.TwitterUsersResponseDTO;
@@ -74,7 +73,7 @@ public class TwitterService {
 
     public Integer followFavoritesById(String tweetId) {
         String url = "https://api.twitter.com/2/tweets/" + tweetId + " /liking_users";
-        var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+        var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
         if (response.getBody() != null && response.getBody().getData() != null) {
             response.getBody().getData().forEach(data -> followUser(data.getId()));
             return response.getBody().getData().size();
@@ -88,7 +87,7 @@ public class TwitterService {
         List<DataDTO> users = new ArrayList<>();
         while (cursor != 0L) {
             String url = "https://api.twitter.com/1.1/followers/list.json?cursor=" + cursor + "&count=200&screen_name=" + username;
-            TwitterUsersResponseDTO response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterUsersResponseDTO.class).getBody();
+            TwitterUsersResponseDTO response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterUsersResponseDTO.class).getBody();
             users.addAll(response.getUsers());
             cursor = response.getNext_cursor();
         }
@@ -102,7 +101,7 @@ public class TwitterService {
         List<DataDTO> users = new ArrayList<>();
         while (cursor != 0L) {
             String url = "https://api.twitter.com/1.1/friends/list.json?cursor=" + cursor + "&count=200&screen_name=" + username;
-            TwitterUsersResponseDTO response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterUsersResponseDTO.class).getBody();
+            TwitterUsersResponseDTO response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterUsersResponseDTO.class).getBody();
             users.addAll(response.getUsers());
             cursor = response.getNext_cursor();
         }
@@ -113,31 +112,25 @@ public class TwitterService {
     public ResponseEntity<TwitterResponseDTO> getTweetsAndRetweetsForUserIdInLast(String userId, String timeframe) {
         LOG.warn("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=replies&max_results=5&start_time=" + timeframe;
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(String userId) {
         LOG.warn("Checking for tweets...");
         String url = "https://api.twitter.com/2/users/" + userId + " /tweets?max_results=5";
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserIdInLast(String userId, String timeframe) {
         LOG.warn("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=retweets,replies&max_results=5&start_time=" + timeframe;
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), TwitterResponseDTO.class);
-    }
-
-    public ResponseEntity<FriendshipDTO> showFriendship(String screenName) {
-        LOG.warn("Getting friendship between me and " + screenName + "...");
-        String url = "https://api.twitter.com/1.1/friendships/show.json?source_screen_name=PhishCompanion&target_screen_name=" + screenName;
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), FriendshipDTO.class);
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
     public ResponseEntity<DataDTO> showUser(String screenName) {
         LOG.warn("Getting " + screenName + "...");
         String url = "https://api.twitter.com/1.1/users/show.json?screen_name=" + screenName;
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders()), DataDTO.class);
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), DataDTO.class);
     }
 
     public void tweet(String tweet, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret) {
@@ -149,22 +142,21 @@ public class TwitterService {
     }
 
     public TweetResponseDTO tweet(String tweet, Long inReplyTo) {
+        if (tweet == null) {
+            return null;
+        }
         if (tweet.length() > 280) {
             String restOfTweet = tweet.substring(280);
             String firstPart = tweet.substring(0, 280);
             inReplyTo = tweet(firstPart, inReplyTo).getId();
             inReplyTo = tweet(restOfTweet, inReplyTo).getId();
         }
-        if (tweet == null) {
-            return null;
-        }
         String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
         String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
         if (inReplyTo != null) {
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
+            } catch (InterruptedException e) {}
             url += "&in_reply_to_status_id=" + inReplyTo;
         }
         String successMessage = "Tweeted: \"" + encodedTweet + "\".";
@@ -184,7 +176,7 @@ public class TwitterService {
         String failureMessage = "Error trying to unfollow: \"" + user.getScreenName() + "\".";
         String successMessage = "Successfully unfollowed: \"" + user.getScreenName() + "\".";
 
-        if (localEnvironment()) {
+        if (isLocalEnvironment()) {
             LOG.warn("Would have unfollowed: " + user.getScreenName());
             return;
         }
@@ -200,13 +192,13 @@ public class TwitterService {
         post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(), creds.getAccessToken(), creds.getAccessTokenSecret(), null);
     }
 
-    private HttpHeaders getHeaders() {
+    private HttpHeaders getHeadersWithBearerToken() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + creds.getBearerToken());
         return headers;
     }
 
-    private boolean localEnvironment() {
+    private boolean isLocalEnvironment() {
         return environment.getActiveProfiles().length > 0 && environment.getActiveProfiles()[0].equals("local");
     }
 
@@ -217,7 +209,7 @@ public class TwitterService {
             HttpPost httpPost = new HttpPost(url);
             oAuthConsumer.sign(httpPost);
             HttpClient httpClient = new DefaultHttpClient();
-            if (localEnvironment()) {
+            if (isLocalEnvironment()) {
                 if (tweet != null) {
                     LOG.warn("Would have tweeted: " + tweet);
                 }

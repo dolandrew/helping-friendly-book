@@ -23,7 +23,7 @@ public class TweetWriter {
         return tweet + "\n\n#phish #phishstats #phishcompanion " + customHashtags;
     }
 
-    public String writeTweet(SongDTO songDTO, Integer bustoutThreshold) {
+    public String writeSongStatsTweet(SongDTO songDTO, Integer bustoutThreshold) {
         if (songDTO == null) {
             return null;
         }
@@ -32,7 +32,7 @@ public class TweetWriter {
         if (songDTO.getTimes() == 0) {
             tweet = songDTO.getName();
         } else {
-            tweet += count(songDTO.getTimes() + 1) + " " + songDTO.getName() +
+            tweet += toCardinalNumber(songDTO.getTimes() + 1) + " " + songDTO.getName() +
                     "\nLast played: " + songDTO.getLastPlayed() +
                     "\nGap: " + songDTO.getGap() +
                     "\nFirst played: " + songDTO.getDebut() +
@@ -48,7 +48,7 @@ public class TweetWriter {
         return tweetWithHashtags;
     }
 
-    private String count(int times) {
+    private String toCardinalNumber(int times) {
         if (("" + times).endsWith("11")) {
             return times + "th";
         }

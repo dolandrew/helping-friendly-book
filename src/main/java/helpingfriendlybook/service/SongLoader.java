@@ -8,7 +8,6 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,16 +20,16 @@ public class SongLoader {
 
     private final GoogliTweeter googliTweeter;
 
-    private final RestTemplate restTemplate;
+    private final PhishDotNetProxyService phishDotNetProxyService;
 
-    public SongLoader(RestTemplate restTemplate, GoogliTweeter googliTweeter) {
-        this.restTemplate = restTemplate;
+    public SongLoader(PhishDotNetProxyService phishDotNetProxyService, GoogliTweeter googliTweeter) {
+        this.phishDotNetProxyService = phishDotNetProxyService;
         this.googliTweeter = googliTweeter;
     }
 
     public List<SongDTO> getSongs() {
         LOG.warn("Fetching songs...");
-        String response = restTemplate.getForObject(PHISH_NET_URL + "/song", String.class);
+        String response = phishDotNetProxyService.getSongs();
         Document doc = Jsoup.parse(response);
         Elements rows = doc.getElementsByTag("tr");
         List<SongDTO> songs = new ArrayList<>();

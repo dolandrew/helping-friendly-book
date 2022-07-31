@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
-import static helpingfriendlybook.service.TweetListener.cleanSongName;
+import static helpingfriendlybook.service.SongStatsService.cleanSongName;
 
 @Service
 public class OneTimeSongTweeter {
@@ -26,7 +26,7 @@ public class OneTimeSongTweeter {
 
     private final TwitterService twitterService;
 
-    private final TweetListener tweetListener;
+    private final SongStatsService songStatsService;
 
     @Value("${bustout.threshold}")
     private Integer bustoutThreshold;
@@ -34,27 +34,23 @@ public class OneTimeSongTweeter {
     @Value("${one.time.song}")
     private String oneTimeSong;
 
-    public OneTimeSongTweeter(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter, TwitterService twitterService, Environment environment, TweetListener tweetListener) {
+    public OneTimeSongTweeter(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter, TwitterService twitterService, Environment environment, SongStatsService songStatsService) {
         this.metadataAssembler = metadataAssembler;
         this.tweetWriter = tweetWriter;
         this.googliTweeter = googliTweeter;
         this.twitterService = twitterService;
         this.environment = environment;
-        this.tweetListener = tweetListener;
+        this.songStatsService = songStatsService;
     }
 
     @PostConstruct
     public void oneTimeSong() {
         if (StringUtils.isNotBlank(oneTimeSong)) {
             googliTweeter.tweet("Found one time song: " + oneTimeSong);
-            try {
-                tweetListener.checkForSetStart(oneTimeSong);
-            } catch (Exception e) {
-                googliTweeter.tweet("Failed to tweet set start!");
-            }
+            songStatsService.checkForSetStart(oneTimeSong);
             String oneTimeSongCleaned = cleanSongName(oneTimeSong);
             SongDTO songDTO = metadataAssembler.assembleMetadata(oneTimeSongCleaned);
-            String tweet = tweetWriter.writeTweet(songDTO, bustoutThreshold);
+            String tweet = tweetWriter.writeSongStatsTweet(songDTO, bustoutThreshold);
             if (localEnvironment()) {
                 LOG.warn("Would have tweeted: " + tweet);
                 return;

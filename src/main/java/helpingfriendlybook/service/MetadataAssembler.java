@@ -9,20 +9,22 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static helpingfriendlybook.service.PhishDotNetProxyService.getVenueOfShow;
+
 @Service
 public class MetadataAssembler {
     private static final Logger LOG = LoggerFactory.getLogger(MetadataAssembler.class);
 
     private final GoogliTweeter googliTweeter;
 
-    private final OnThisDayService onThisDayService;
+    private final PhishDotNetProxyService phishDotNetProxyService;
 
     private final SongLoader songLoader;
 
-    public MetadataAssembler(SongLoader songLoader, GoogliTweeter googliTweeter, OnThisDayService onThisDayService) {
+    public MetadataAssembler(SongLoader songLoader, GoogliTweeter googliTweeter, PhishDotNetProxyService phishDotNetProxyService) {
         this.songLoader = songLoader;
         this.googliTweeter = googliTweeter;
-        this.onThisDayService = onThisDayService;
+        this.phishDotNetProxyService = phishDotNetProxyService;
     }
 
     public SongDTO assembleMetadata(String songName) {
@@ -41,9 +43,7 @@ public class MetadataAssembler {
                 return assembleMetadata(fetchedSong.getAliasOf());
             }
             if (fetchedSong.getLastPlayed() != null && !fetchedSong.getLastPlayed().equals("—")) {
-                String[] dateParts = fetchedSong.getLastPlayed().split("-");
-                List<Element> shows = onThisDayService.getShowsForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
-                String venue = onThisDayService.getVenueOfShow(shows.get(0));
+                String venue = getVenue(fetchedSong.getLastPlayed());
                 songDTO.setLastPlayed(fetchedSong.getLastPlayed() + " at " + venue);
             }
             songDTO.setName(fetchedSong.getName());
@@ -51,9 +51,7 @@ public class MetadataAssembler {
             songDTO.setLink(fetchedSong.getLink());
             songDTO.setTimes(fetchedSong.getTimes());
             if (fetchedSong.getDebut() != null && !fetchedSong.getDebut().equals("—")) {
-                String[] dateParts = fetchedSong.getDebut().split("-");
-                List<Element> shows = onThisDayService.getShowsForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
-                String venue = onThisDayService.getVenueOfShow(shows.get(0));
+                String venue = getVenue(fetchedSong.getDebut());
                 songDTO.setDebut(fetchedSong.getDebut() + " at " + venue);
             }
         } else {
@@ -61,5 +59,11 @@ public class MetadataAssembler {
         }
         LOG.warn("Successfully assembled metadata for: " + cleanedSongName + "");
         return songDTO;
+    }
+
+    private String getVenue(String date) {
+        String[] dateParts = date.split("-");
+        List<Element> shows = phishDotNetProxyService.getShowsForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
+        return getVenueOfShow(shows.get(0));
     }
 }

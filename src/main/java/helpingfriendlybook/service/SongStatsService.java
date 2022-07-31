@@ -18,12 +18,14 @@ import static java.lang.Integer.parseInt;
 
 @EnableScheduling
 @Service
-public class TweetListener {
-    private static final Logger LOG = LoggerFactory.getLogger(TweetListener.class);
+public class SongStatsService {
+    private static final Logger LOG = LoggerFactory.getLogger(SongStatsService.class);
 
     private final GoogliTweeter googliTweeter;
 
     private final MetadataAssembler metadataAssembler;
+
+    private final TimeApiService timeApiService;
 
     private final TweetWriter tweetWriter;
 
@@ -40,10 +42,8 @@ public class TweetListener {
     @Value("${twitter.phish.ftr.id}")
     private String phishFTRid;
 
-    private final TimeApiService timeApiService;
-
-    public TweetListener(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter,
-                         TwitterService twitterService, TimeApiService timeApiService) {
+    public SongStatsService(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter,
+                            TwitterService twitterService, TimeApiService timeApiService) {
         this.metadataAssembler = metadataAssembler;
         this.tweetWriter = tweetWriter;
         this.googliTweeter = googliTweeter;
@@ -83,6 +83,18 @@ public class TweetListener {
                 .replaceAll("ENCORE: ", "");
     }
 
+    public void checkForSetStart(String tweet) {
+        if (tweet.contains("SET ONE:") || tweet.toLowerCase(Locale.ROOT).contains("set one:")) {
+            tweetSetStart("SET ONE", "\uD83C\uDF89");
+        } else if (tweet.contains("SET TWO:") || tweet.toLowerCase(Locale.ROOT).contains("set two:")) {
+            tweetSetStart("SET TWO", "\uD83D\uDC20");
+        } else if (tweet.contains("SET THREE:") || tweet.toLowerCase(Locale.ROOT).contains("set three:")) {
+            tweetSetStart("SET THREE", "\uD83D\uDD7A");
+        } else if (tweet.contains("ENCORE:") || tweet.toLowerCase(Locale.ROOT).contains("encore:")) {
+            tweetSetStart("ENCORE", "⭕️");
+        }
+    }
+
     private String processIncomingTweet(ResponseEntity<TwitterResponseDTO> responseEntity) {
         String cleanedSongName = null;
         TwitterResponseDTO body = responseEntity.getBody();
@@ -102,11 +114,7 @@ public class TweetListener {
                 if (shouldIgnoreTweet(fetchedSongName)) {
                     return null;
                 }
-                try {
-                    checkForSetStart(fetchedSongName);
-                } catch (Exception e) {
-                    googliTweeter.tweet("Failed to tweet set start!");
-                }
+                checkForSetStart(fetchedSongName);
             } else {
                 LOG.warn("HFB found no tweets in given time period.");
             }
@@ -116,7 +124,7 @@ public class TweetListener {
 
     private void processOutgoingTweet(String songName) {
         SongDTO songDTO = metadataAssembler.assembleMetadata(songName);
-        String tweet = tweetWriter.writeTweet(songDTO, bustoutThreshold);
+        String tweet = tweetWriter.writeSongStatsTweet(songDTO, bustoutThreshold);
         twitterService.tweet(tweet);
     }
 
@@ -145,23 +153,13 @@ public class TweetListener {
         return false;
     }
 
-    public void checkForSetStart(String tweet) {
-        if (tweet.contains("SET ONE:") || tweet.toLowerCase(Locale.ROOT).contains("set one:")) {
-            tweetSetStart("SET ONE", "\uD83C\uDF89");
-        } else if (tweet.contains("SET TWO:") || tweet.toLowerCase(Locale.ROOT).contains("set two:")) {
-            tweetSetStart("SET TWO", "\uD83D\uDC20");
-        } else if (tweet.contains("SET THREE:") || tweet.toLowerCase(Locale.ROOT).contains("set three:")) {
-            tweetSetStart("SET THREE", "\uD83D\uDD7A");
-        } else if (tweet.contains("ENCORE:") || tweet.toLowerCase(Locale.ROOT).contains("encore:")) {
-            tweetSetStart("ENCORE", "⭕️");
-        }
-    }
-
     private void tweetSetStart(String setName, String emoji) {
         String timeInNewYork = timeApiService.getTimeInNewYork();
         String[] timeParts = timeInNewYork.split(":");
         int hour = parseInt(timeParts[0]) % 12;
-        if (hour ==0) hour = 12;
+        if (hour == 0) {
+            hour = 12;
+        }
         twitterService.tweet(emoji + " " + setName + " started at " + hour + ":" + timeParts[1] + (parseInt(timeParts[0]) >= 12 ? " PM" : " AM") + " ET");
     }
 }
