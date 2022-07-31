@@ -66,85 +66,85 @@ public class SongStatsServiceIntegrationTest {
     }
 
     @Test
-    public void test_songStats_TheMangoSong() {
-        TwitterResponseDTO body = mockResponse("The Mango Song");
+    public void test_songStats_DividedSky() {
+        TwitterResponseDTO body = mockResponse("Divided Sky");
 
         songStatsService.listenToPhishFTR();
 
         verify(twitterService).favoriteTweetById(body.getData().get(0).getId());
-        verify(twitterService).tweet(contains("106th The Mango Song\n" +
-                "Last played: 2022-07-26 at Gallagher's \n" +
-                "Gap: 3\n" +
-                "First played: 1989-03-30 at Merriweather Post Pavilion \n" +
-                "https://www.phish.net/song/the-mango-song\n" +
+        verify(twitterService).tweet(contains("428th Divided Sky\n" +
+                "Last played: 2022-07-23 at Gallagher's \n" +
+                "Gap: 5\n" +
+                "First played: 1987-05-11 at Merriweather Post Pavilion \n" +
+                "https://www.phish.net/song/divided-sky\n" +
                 "\n" +
                 "#phish #phishstats #phishcompanion "));
     }
 
     @Test
-    public void test_songStats_SetOne_TheLizards() {
-        TwitterResponseDTO body = mockResponse("SET ONE: The Lizards");
+    public void test_songStats_SetOne_ACDCBag() {
+        TwitterResponseDTO body = mockResponse("SET ONE: AC/DC Bag");
 
         songStatsService.listenToPhishFTR();
 
         verify(twitterService).favoriteTweetById(body.getData().get(0).getId());
         verify(twitterService).tweet(contains("\uD83C\uDF89 SET ONE started at "));
-        verify(twitterService).tweet(contains("325th The Lizards\n" +
-                "Last played: 2022-07-30 at Gallagher's \n" +
-                "Gap: 0\n" +
-                "First played: 1988-01-27 at Merriweather Post Pavilion \n" +
-                "https://www.phish.net/song/the-lizards\n" +
+        verify(twitterService).tweet(contains("325th AC/DC Bag\n" +
+                "Last played: 2022-07-20 at Gallagher's \n" +
+                "Gap: 7\n" +
+                "First played: 1986-04-01 at Merriweather Post Pavilion \n" +
+                "https://www.phish.net/song/acdc-bag\n" +
                 "\n" +
                 "#phish #phishstats #phishcompanion "));
     }
 
     @Test
-    public void test_songStats_SetTwo_CharacterZero() {
-        TwitterResponseDTO body = mockResponse("SET TWO: Character Zero");
+    public void test_songStats_SetTwo_AlumniBlues() {
+        TwitterResponseDTO body = mockResponse("SET TWO: Alumni Blues");
 
         songStatsService.listenToPhishFTR();
 
         verify(twitterService).favoriteTweetById(body.getData().get(0).getId());
         verify(twitterService).tweet(contains("\uD83D\uDC20 SET TWO started at "));
-        verify(twitterService).tweet(contains("232nd Character Zero\n" +
-                "Last played: 2022-07-24 at Gallagher's \n" +
-                "Gap: 4\n" +
-                "First played: 1996-06-06 at Merriweather Post Pavilion \n" +
-                "https://www.phish.net/song/character-zero\n" +
+        verify(twitterService).tweet(contains("201st Alumni Blues\n" +
+                "Last played: 2021-09-04 at Gallagher's \n" +
+                "Gap: 48\n" +
+                "First played: 1985-03-16 at Merriweather Post Pavilion \n" +
+                "https://www.phish.net/song/alumni-blues\n" +
                 "\n" +
                 "#phish #phishstats #phishcompanion "));
     }
 
     @Test
-    public void test_songStats_SetThree_Julius() {
-        TwitterResponseDTO body = mockResponse("SET THREE: Julius");
+    public void test_songStats_SetThree_AndSoToBed() {
+        TwitterResponseDTO body = mockResponse("SET THREE: And So To Bed");
 
         songStatsService.listenToPhishFTR();
 
         verify(twitterService).favoriteTweetById(body.getData().get(0).getId());
         verify(twitterService).tweet(contains("\uD83D\uDD7A SET THREE started at "));
-        verify(twitterService).tweet(contains("230th Julius\n" +
-                "Last played: 2022-07-26 at Gallagher's \n" +
-                "Gap: 3\n" +
-                "First played: 1994-04-04 at Merriweather Post Pavilion \n" +
-                "https://www.phish.net/song/julius\n" +
+        verify(twitterService).tweet(contains("2nd And So To Bed\n" +
+                "Last played: 2021-10-15 at Gallagher's \n" +
+                "Gap: 46\n" +
+                "First played: 2021-10-15 at Merriweather Post Pavilion \n" +
+                "https://www.phish.net/song/and-so-to-bed\n" +
                 "\n" +
                 "#phish #phishstats #phishcompanion "));
     }
 
     @Test
-    public void test_songStats_Encore_CrosseyedAndPainless() {
-        TwitterResponseDTO body = mockResponse("ENCORE: Crosseyed And Painless");
+    public void test_songStats_Encore_YEM() {
+        TwitterResponseDTO body = mockResponse("ENCORE: You Enjoy Myself");
 
         songStatsService.listenToPhishFTR();
 
         verify(twitterService).favoriteTweetById(body.getData().get(0).getId());
         verify(twitterService).tweet(contains("⭕️ ENCORE started at "));
-        verify(twitterService).tweet(contains("58th Crosseyed and Painless\n" +
-                "Last played: 2022-07-23 at Gallagher's \n" +
-                "Gap: 5\n" +
-                "First played: 1996-10-31 at Merriweather Post Pavilion \n" +
-                "https://www.phish.net/song/crosseyed-and-painless\n" +
+        verify(twitterService).tweet(contains("624th You Enjoy Myself\n" +
+                "Last played: 2022-07-22 at Gallagher's \n" +
+                "Gap: 6\n" +
+                "First played: 1986-02-03 at Merriweather Post Pavilion \n" +
+                "https://www.phish.net/song/you-enjoy-myself\n" +
                 "\n" +
                 "#phish #phishstats #phishcompanion "));
     }
