@@ -43,7 +43,12 @@ public class PhishDotNetProxyService {
         return shows;
     }
 
-    public List<Element> getShowsWithAbbreviatedSetlists(String url) {
+    public Element getRandomShow() {
+        String url = "https://phish.net/setlists/jump/random";
+        return getShowsWithAbbreviatedSetlists(url).get(0);
+    }
+
+    private List<Element> getShowsWithAbbreviatedSetlists(String url) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Cookie", " songabbr=on; ");
         HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(httpHeaders);
@@ -55,7 +60,7 @@ public class PhishDotNetProxyService {
         return restTemplate.getForObject("https://phish.net/song", String.class);
     }
 
-    private List<Element> getShowsFromResponse(String response) {
+    public static List<Element> getShowsFromResponse(String response) {
         Document doc = Jsoup.parse(response);
         int setlists = doc.getElementsByClass("setlist").size();
 

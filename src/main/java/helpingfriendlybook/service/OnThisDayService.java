@@ -164,8 +164,7 @@ public class OnThisDayService {
 
     private void tweetRandomShow() {
         LOG.warn("Tweeting a random setlist...");
-        String url = "https://phish.net/setlists/jump/random";
-        Element show = phishDotNetProxyService.getShowsWithAbbreviatedSetlists(url).get(0);
+        Element show = phishDotNetProxyService.getRandomShow();
         String tweet = "#RandomShow\n";
         tweetTheShow(show, tweet);
     }

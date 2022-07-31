@@ -102,6 +102,11 @@ public class SongStatsService {
             if (body.getData() != null) {
                 DataDTO data = body.getData().get(0);
                 String fetchedSongName = data.getText();
+                String tweetId = data.getId();
+                twitterService.favoriteTweetById(tweetId);
+                if (shouldIgnoreTweet(fetchedSongName)) {
+                    return null;
+                }
                 cleanedSongName = cleanSongName(fetchedSongName);
                 if (sameTweet(cleanedSongName)) {
                     LOG.warn("Found no new tweets.");
@@ -109,11 +114,6 @@ public class SongStatsService {
                 }
                 LOG.warn("Found new tweet.");
                 currentSongName = cleanedSongName;
-                String tweetId = responseEntity.getBody().getData().get(0).getId();
-                twitterService.favoriteTweetById(tweetId);
-                if (shouldIgnoreTweet(fetchedSongName)) {
-                    return null;
-                }
                 checkForSetStart(fetchedSongName);
             } else {
                 LOG.warn("HFB found no tweets in given time period.");
