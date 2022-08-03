@@ -1,5 +1,6 @@
 package helpingfriendlybook.service;
 
+import helpingfriendlybook.dto.TweetResponseDTO;
 import org.apache.commons.lang3.text.WordUtils;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -160,7 +161,7 @@ public class OnThisDayService {
         if (inReplyTo != null) {
             tweetTheShowInReply(show, tweet, inReplyTo);
         } else {
-            tweetTheShow(show, tweet, null);
+            tweetTheShow(show, tweet);
         }
     }
 
@@ -168,11 +169,10 @@ public class OnThisDayService {
         LOG.warn("Tweeting a random setlist...");
         Element show = phishDotNetProxyService.getRandomShow();
         String tweet = "#RandomShow\n";
-        tweetTheShow(show, tweet, null);
+        tweetTheShow(show, tweet);
     }
 
-    private void tweetTheShow(Element show, String tweet, Long inReplyTo) {
-        String username = tweet;
+    private void tweetTheShow(Element show, String tweet) {
         tweet = addActualDate(show, tweet);
         tweet = addVenue(show, tweet);
         tweet = addLocation(show, tweet);
@@ -180,9 +180,9 @@ public class OnThisDayService {
         // TODO: add link to relisten, phish'n, phishtracks
         tweet = tweetWriter.addShowHashtags(tweet);
 
-        twitterService.tweet(username + getSetlistNotes(show), inReplyTo);
-        twitterService.tweet(username + getSetlist(show), inReplyTo);
-        twitterService.tweet(tweet, inReplyTo);
+        TweetResponseDTO tweetResponseDTO = twitterService.tweet(tweet);
+        tweetResponseDTO = twitterService.tweet(getSetlist(show), tweetResponseDTO.getId());
+        twitterService.tweet(getSetlistNotes(show), tweetResponseDTO.getId());
     }
 
     private void tweetTheShowInReply(Element show, String tweet, Long inReplyTo) {
