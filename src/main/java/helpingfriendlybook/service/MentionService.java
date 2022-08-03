@@ -50,15 +50,19 @@ public class MentionService {
                 } else {
                     continue;
                 }
+                LOG.warn("Found a show date mentioned.");
                 twitterService.favoriteTweetById(tweet.getId());
                 matcher = pattern.matcher(tweet.getText());
                 if (matcher.find()) {
                     dateParts = matcher.group(0).split("/");
                     List<Element> shows = phishDotNetProxyService.getShowsForDate(Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]), Integer.valueOf(dateParts[2]));
+                    String username = "@" + twitterService.getUserById(tweet.getAuthor_id()).getData().getUsername() + " ";
                     if (!isEmpty(shows)) {
                         int random = new Random().nextInt(shows.size());
                         Element show = shows.get(random);
-                        onThisDayService.tweetOnThisDay(show, Long.valueOf(tweet.getId()), "@" + twitterService.getUserById(tweet.getAuthor_id()).getData().getUsername() + " ");
+                        onThisDayService.tweetOnThisDay(show, Long.valueOf(tweet.getId()), username);
+                    } else {
+                        twitterService.tweet(username + "Helping Friendly Bot was unable to find a show on this date on phish.net.", Long.valueOf(tweet.getId()));
                     }
                 }
             }

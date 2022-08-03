@@ -67,7 +67,7 @@ public class Favoriter {
                             }
                         }
                     } else {
-                        LOG.warn("HFB found no tweets in given time period.");
+                        LOG.info("HFB found no tweets in given time period.");
                     }
                 }
             } catch (Exception e) {

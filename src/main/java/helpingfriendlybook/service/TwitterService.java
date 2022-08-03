@@ -89,7 +89,7 @@ public class TwitterService {
     }
 
     public List<DataDTO> getFollowersList(String username) {
-        LOG.warn("Getting followers for " + username + "...");
+        LOG.info("Getting followers for " + username + "...");
         Long cursor = -1L;
         List<DataDTO> users = new ArrayList<>();
         while (cursor != 0L) {
@@ -98,12 +98,12 @@ public class TwitterService {
             users.addAll(response.getUsers());
             cursor = response.getNext_cursor();
         }
-        LOG.warn("Found " + users.size() + " followers for " + username + ".");
+        LOG.info("Found " + users.size() + " followers for " + username + ".");
         return users;
     }
 
     public List<DataDTO> getFriendsList(String username) {
-        LOG.warn("Getting friends for " + username + "...");
+        LOG.info("Getting friends for " + username + "...");
         Long cursor = -1L;
         List<DataDTO> users = new ArrayList<>();
         while (cursor != 0L) {
@@ -112,42 +112,42 @@ public class TwitterService {
             users.addAll(response.getUsers());
             cursor = response.getNext_cursor();
         }
-        LOG.warn("Found " + users.size() + " friends for " + username + ".");
+        LOG.info("Found " + users.size() + " friends for " + username + ".");
         return users;
     }
 
     public TwitterUserResponseDTO getUserById(String userId) {
-        LOG.warn("Getting user " + userId + " by id...");
+        LOG.info("Getting user " + userId + " by id...");
         String url = "https://api.twitter.com/2/users/" + userId;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterUserResponseDTO.class).getBody();
     }
 
     public ResponseEntity<TwitterResponseDTO> getTweetsAndRetweetsForUserIdInLast(String userId, String timeframe) {
-        LOG.warn("Checking for tweets...");
+        LOG.info("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=replies&max_results=5&start_time=" + timeframe;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(String userId) {
-        LOG.warn("Checking for tweets...");
+        LOG.info("Checking for tweets...");
         String url = "https://api.twitter.com/2/users/" + userId + " /tweets?max_results=5";
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserIdInLast(String userId, String timeframe) {
-        LOG.warn("Checking for tweets...");
+        LOG.info("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=retweets,replies&max_results=5&start_time=" + timeframe;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
     public ResponseEntity<TwitterResponseDTO> getMentionsForUserIdInLast(String userId, String timeframe) {
-        LOG.warn("Getting mentions for user " + userId + "...");
+        LOG.info("Getting mentions for user " + userId + "...");
         var url = "https://api.twitter.com/2/users/" + userId + " /mentions?expansions=author_id&user.fields=username&start_time=" + timeframe;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
     public ResponseEntity<DataDTO> showUser(String screenName) {
-        LOG.warn("Getting " + screenName + "...");
+        LOG.info("Getting " + screenName + "...");
         String url = "https://api.twitter.com/1.1/users/show.json?screen_name=" + screenName;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), DataDTO.class);
     }
@@ -190,7 +190,7 @@ public class TwitterService {
     }
 
     public void unfollow(DataDTO user) {
-        LOG.warn("Unfollowing " + user.getScreenName() + "...");
+        LOG.info("Unfollowing " + user.getScreenName() + "...");
         String url = "https://api.twitter.com/1.1/friendships/destroy.json?user_id=" + user.getId();
         String failureMessage = "Error trying to unfollow: \"" + user.getScreenName() + "\".";
         String successMessage = "Successfully unfollowed: \"" + user.getScreenName() + "\".";
@@ -203,7 +203,7 @@ public class TwitterService {
     }
 
     private void followUser(String userId) {
-        LOG.warn("Attempting to follow user with id: " + userId);
+        LOG.info("Attempting to follow user with id: " + userId);
         String url = "https://api.twitter.com/1.1/friendships/create.json?user_id=" + userId;
         String successMessage = "Successfully followed user with id: " + userId;
         String failureMessage = "Error trying to follow user with id: " + userId;

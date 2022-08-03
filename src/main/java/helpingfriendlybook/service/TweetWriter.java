@@ -20,7 +20,7 @@ public class TweetWriter {
     }
 
     public String addShowReplyHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishcompanion #" + System.currentTimeMillis()/100000;
+        return tweet + "\n\n#phish #phishcompanion #" + System.currentTimeMillis()/1000000;
     }
 
     public String addSongHashtags(String tweet) {

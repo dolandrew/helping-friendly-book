@@ -36,10 +36,10 @@ public class PhishDotNetProxyService {
     }
 
     public List<Element> getShowsForDate(Integer day, Integer month, Integer year) {
-        LOG.warn("Looking for shows on " + month + "-" + day + "...");
+        LOG.info("Looking for shows on " + month + "-" + day + "...");
         String url = "https://phish.net/setlists/?month=" + month + "&day=" + day + (year != null ? "&year=" + year : "");
         List<Element> shows = getShowsWithAbbreviatedSetlists(url);
-        LOG.warn("HFB found " + shows.size() + " shows on " + (year != null ? year + "-" : "") + month + "-" + day + ".");
+        LOG.info("HFB found " + shows.size() + " shows on " + (year != null ? year + "-" : "") + month + "-" + day + ".");
         return shows;
     }
 

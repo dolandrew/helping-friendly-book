@@ -29,11 +29,17 @@ public class MetadataAssembler {
 
     public SongDTO assembleMetadata(String songName) {
         String cleanedSongName = songName.replaceAll("\\(|\\)|,", "");
-        LOG.warn("Assembling metadata for: " + cleanedSongName);
+        if (cleanedSongName.equals("Old Home Place")) {
+            cleanedSongName = "The Old Home Place";
+        } else if (cleanedSongName.equals("Timber")) {
+            cleanedSongName = "Timber Jerry the Mule";
+        }
+        String adjustedCleanedSongName = cleanedSongName;
+        LOG.warn("Assembling metadata for: " + adjustedCleanedSongName);
         SongDTO songDTO = new SongDTO();
-        songDTO.setName(cleanedSongName);
+        songDTO.setName(adjustedCleanedSongName);
         List<SongDTO> currentSongDTOList = songLoader.getSongs().stream()
-                .filter(song -> song.getNameLower().replaceAll("\\(|\\)|,", "").equals(cleanedSongName.toLowerCase()))
+                .filter(song -> song.getNameLower().replaceAll("\\(|\\)|,", "").equals(adjustedCleanedSongName.toLowerCase()))
                 .collect(Collectors.toList());
         if (!currentSongDTOList.isEmpty()) {
             SongDTO fetchedSong = currentSongDTOList.get(0);
@@ -55,9 +61,9 @@ public class MetadataAssembler {
                 songDTO.setDebut(fetchedSong.getDebut() + " at " + venue);
             }
         } else {
-            googliTweeter.tweet("HFB tried to assemble metadata for " + cleanedSongName + " but found no results. Assuming this is a debut.");
+            googliTweeter.tweet("HFB tried to assemble metadata for " + adjustedCleanedSongName + " but found no results. Assuming this is a debut.");
         }
-        LOG.warn("Successfully assembled metadata for: " + cleanedSongName + "");
+        LOG.warn("Successfully assembled metadata for: " + adjustedCleanedSongName + "");
         return songDTO;
     }
 

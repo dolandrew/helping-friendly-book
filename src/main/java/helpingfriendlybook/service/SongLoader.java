@@ -28,7 +28,7 @@ public class SongLoader {
     }
 
     public List<SongDTO> getSongs() {
-        LOG.warn("Fetching songs...");
+        LOG.info("Fetching songs...");
         String response = phishDotNetProxyService.getSongs();
         Document doc = Jsoup.parse(response);
         Elements rows = doc.getElementsByTag("tr");
@@ -44,7 +44,7 @@ public class SongLoader {
                 songDTO.setNameLower(songName.toLowerCase());
 
                 if (cells.get(2).wholeText().contains("Found in Discography")) {
-                    LOG.info(songName + "has never been played. It is only found in discography.");
+                    LOG.warn(songName + "has never been played. It is only found in discography.");
                     continue;
                 }
                 if (cells.get(2).wholeText().contains("Alias of")) {
@@ -64,7 +64,7 @@ public class SongLoader {
                 googliTweeter.tweet("HFB caught exception while processing \"" + songDTO.getName() + "\"", e);
             }
         }
-        LOG.warn("Successfully fetched " + songs.size() + " songs.");
+        LOG.info("Successfully fetched " + songs.size() + " songs.");
         return songs;
     }
 }

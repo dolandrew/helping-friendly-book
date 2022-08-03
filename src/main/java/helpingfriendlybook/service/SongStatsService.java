@@ -109,14 +109,14 @@ public class SongStatsService {
                 }
                 cleanedSongName = cleanSongName(fetchedSongName);
                 if (sameTweet(cleanedSongName)) {
-                    LOG.warn("Found no new tweets.");
+                    LOG.info("Found no new tweets.");
                     return null;
                 }
-                LOG.warn("Found new tweet.");
+                LOG.info("Found new tweet.");
                 currentSongName = cleanedSongName;
                 checkForSetStart(fetchedSongName);
             } else {
-                LOG.warn("HFB found no tweets in given time period.");
+                LOG.info("HFB found no tweets in given time period.");
             }
         }
         return cleanedSongName;
