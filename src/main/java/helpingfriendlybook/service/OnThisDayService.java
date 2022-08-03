@@ -1,6 +1,5 @@
 package helpingfriendlybook.service;
 
-import helpingfriendlybook.dto.TweetResponseDTO;
 import org.apache.commons.lang3.text.WordUtils;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ public class OnThisDayService {
             if (!isEmpty(shows)) {
                 int random = new Random().nextInt(shows.size());
                 Element show = shows.get(random);
-                tweetOnThisDay(show);
+                tweetOnThisDay(show, null, "#OnThisDay\n");
             } else {
                 tweetRandomShow();
             }
@@ -156,20 +155,24 @@ public class OnThisDayService {
         return setlist;
     }
 
-    private void tweetOnThisDay(Element show) {
+    public void tweetOnThisDay(Element show, Long inReplyTo, String tweet) {
         LOG.warn("Tweeting OnThisDay...");
-        String tweet = "#OnThisDay\n";
-        tweetTheShow(show, tweet);
+        if (inReplyTo != null) {
+            tweetTheShowInReply(show, tweet, inReplyTo);
+        } else {
+            tweetTheShow(show, tweet, null);
+        }
     }
 
     private void tweetRandomShow() {
         LOG.warn("Tweeting a random setlist...");
         Element show = phishDotNetProxyService.getRandomShow();
         String tweet = "#RandomShow\n";
-        tweetTheShow(show, tweet);
+        tweetTheShow(show, tweet, null);
     }
 
-    private void tweetTheShow(Element show, String tweet) {
+    private void tweetTheShow(Element show, String tweet, Long inReplyTo) {
+        String username = tweet;
         tweet = addActualDate(show, tweet);
         tweet = addVenue(show, tweet);
         tweet = addLocation(show, tweet);
@@ -177,8 +180,22 @@ public class OnThisDayService {
         // TODO: add link to relisten, phish'n, phishtracks
         tweet = tweetWriter.addShowHashtags(tweet);
 
-        TweetResponseDTO tweetResponseDTO = twitterService.tweet(tweet);
-        tweetResponseDTO = twitterService.tweet(getSetlist(show), tweetResponseDTO.getId());
-        twitterService.tweet(getSetlistNotes(show), tweetResponseDTO.getId());
+        twitterService.tweet(username + getSetlistNotes(show), inReplyTo);
+        twitterService.tweet(username + getSetlist(show), inReplyTo);
+        twitterService.tweet(tweet, inReplyTo);
+    }
+
+    private void tweetTheShowInReply(Element show, String tweet, Long inReplyTo) {
+        String username = tweet;
+        tweet = addActualDate(show, tweet);
+        tweet = addVenue(show, tweet);
+        tweet = addLocation(show, tweet);
+        tweet = addLink(show, tweet);
+        // TODO: add link to relisten, phish'n, phishtracks
+        tweet = tweetWriter.addShowReplyHashtags(tweet);
+
+        twitterService.tweet(username + tweet, inReplyTo);
+        twitterService.tweet(username + getSetlist(show), inReplyTo);
+        twitterService.tweet(username + getSetlistNotes(show), inReplyTo);
     }
 }

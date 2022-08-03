@@ -19,6 +19,10 @@ public class TweetWriter {
         return tweet + "\n\n#phish #phishcompanion #otd" + OffsetDateTime.now().getYear();
     }
 
+    public String addShowReplyHashtags(String tweet) {
+        return tweet + "\n\n#phish #phishcompanion #" + System.currentTimeMillis()/100000;
+    }
+
     public String addSongHashtags(String tweet) {
         return tweet + "\n\n#phish #phishstats #phishcompanion " + customHashtags;
     }

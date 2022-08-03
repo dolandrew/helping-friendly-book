@@ -5,6 +5,7 @@ import helpingfriendlybook.config.HFBConfig;
 import helpingfriendlybook.dto.DataDTO;
 import helpingfriendlybook.dto.TweetResponseDTO;
 import helpingfriendlybook.dto.TwitterResponseDTO;
+import helpingfriendlybook.dto.TwitterUserResponseDTO;
 import helpingfriendlybook.dto.TwitterUsersResponseDTO;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
@@ -33,6 +34,7 @@ import java.util.List;
 
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 @Service
 public class TwitterService {
@@ -56,6 +58,11 @@ public class TwitterService {
     public static String getOneMinuteAgo() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
         return ZonedDateTime.now(ZoneId.of("UTC")).minus(1, MINUTES).format(formatter);
+    }
+
+    public static String getThirtySecondsAgo() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
+        return ZonedDateTime.now(ZoneId.of("UTC")).minus(30, SECONDS).format(formatter);
     }
 
     public static String getSomeHoursAgo(int intervalHours) {
@@ -109,6 +116,12 @@ public class TwitterService {
         return users;
     }
 
+    public TwitterUserResponseDTO getUserById(String userId) {
+        LOG.warn("Getting user " + userId + " by id...");
+        String url = "https://api.twitter.com/2/users/" + userId;
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterUserResponseDTO.class).getBody();
+    }
+
     public ResponseEntity<TwitterResponseDTO> getTweetsAndRetweetsForUserIdInLast(String userId, String timeframe) {
         LOG.warn("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=replies&max_results=5&start_time=" + timeframe;
@@ -124,6 +137,12 @@ public class TwitterService {
     public ResponseEntity<TwitterResponseDTO> getTweetsForUserIdInLast(String userId, String timeframe) {
         LOG.warn("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=retweets,replies&max_results=5&start_time=" + timeframe;
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
+    }
+
+    public ResponseEntity<TwitterResponseDTO> getMentionsForUserIdInLast(String userId, String timeframe) {
+        LOG.warn("Getting mentions for user " + userId + "...");
+        var url = "https://api.twitter.com/2/users/" + userId + " /mentions?expansions=author_id&user.fields=username&start_time=" + timeframe;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 

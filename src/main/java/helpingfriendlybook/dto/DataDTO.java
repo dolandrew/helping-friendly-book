@@ -10,6 +10,8 @@ public class DataDTO {
 
     private String id;
 
+    private String author_id;
+
     private String name;
 
     private String screen_name;
@@ -18,8 +20,16 @@ public class DataDTO {
 
     private String username;
 
+    public String getAuthor_id() {
+        return author_id;
+    }
+
     public Boolean getFollowed_by() {
         return followed_by;
+    }
+
+    public void setAuthor_id(String author_id) {
+        this.author_id = author_id;
     }
 
     public void setFollowed_by(Boolean followed_by) {
