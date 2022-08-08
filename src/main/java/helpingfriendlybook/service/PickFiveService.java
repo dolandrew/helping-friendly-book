@@ -31,7 +31,8 @@ public class PickFiveService {
         List<SongDTO> songs = songLoader.getSongs();
         songs.sort(Comparator.comparing(SongDTO::getTimes).reversed());
         List<SongDTO> picks = songs.stream()
-                .filter(song -> song.getGap() > 8)
+                .filter(song -> song.getGap() > 5)
+                .filter(song -> song.getGap() < 20)
                 .limit(75)
                 .collect(toList());
 
