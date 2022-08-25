@@ -136,6 +136,12 @@ public class OnThisDayService {
                 .replace(" August ", " Aug. ")
                 .replace(" unfinished ", " unf. ")
                 .replace(" unfinished.", " unf.")
+                .replace(" tease ", " tz ")
+                .replace(" tease.", " tz.")
+                .replace(" teases ", " tz's ")
+                .replace(" teases.", " tz's.")
+                .replace(" teased ", " tz'd ")
+                .replace(" teased.", " tz'd.")
                 .replace(" You Enjoy Myself ", " YEM ")
                 .replace(" Down With Disease ", " DwD ")
                 .replace(" Down with Disease ", " DwD ")
@@ -156,7 +162,7 @@ public class OnThisDayService {
         return setlist;
     }
 
-    public void tweetOnThisDay(Element show, Long inReplyTo, String tweet) {
+    public void tweetOnThisDay(Element show, String inReplyTo, String tweet) {
         LOG.warn("Tweeting OnThisDay...");
         if (inReplyTo != null) {
             tweetTheShowInReply(show, tweet, inReplyTo);
@@ -185,7 +191,7 @@ public class OnThisDayService {
         twitterService.tweet(getSetlistNotes(show), tweetResponseDTO.getId());
     }
 
-    private void tweetTheShowInReply(Element show, String tweet, Long inReplyTo) {
+    private void tweetTheShowInReply(Element show, String tweet, String inReplyTo) {
         String username = tweet;
         tweet = addActualDate(show, tweet);
         tweet = addVenue(show, tweet);

@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TweetResponseDTO {
-    private Long id;
+    private String id_str;
 
-    public Long getId() {
-        return id;
+    public String getId() {
+        return id_str;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setId(String id_str) {
+        this.id_str = id_str;
     }
 }

@@ -60,9 +60,9 @@ public class MentionService {
                     if (!isEmpty(shows)) {
                         int random = new Random().nextInt(shows.size());
                         Element show = shows.get(random);
-                        onThisDayService.tweetOnThisDay(show, Long.valueOf(tweet.getId()), username);
+                        onThisDayService.tweetOnThisDay(show, tweet.getId(), username);
                     } else {
-                        twitterService.tweet(username + "Helping Friendly Bot was unable to find a show on this date on phish.net.", Long.valueOf(tweet.getId()));
+                        twitterService.tweet(username + "Helping Friendly Bot was unable to find a show on this date on phish.net.", tweet.getId());
                     }
                 }
             }

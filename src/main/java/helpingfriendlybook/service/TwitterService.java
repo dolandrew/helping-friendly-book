@@ -160,7 +160,7 @@ public class TwitterService {
         post(url, null, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, tweet);
     }
 
-    public TweetResponseDTO tweet(String tweet, Long inReplyTo) {
+    public TweetResponseDTO tweet(String tweet, String inReplyTo) {
         if (tweet == null) {
             return null;
         }
@@ -168,21 +168,23 @@ public class TwitterService {
             String restOfTweet = tweet.substring(280);
             String firstPart = tweet.substring(0, 280);
             inReplyTo = tweet(firstPart, inReplyTo).getId();
-            inReplyTo = tweet(restOfTweet, inReplyTo).getId();
-        }
-        String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
-        String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
-        if (inReplyTo != null) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {}
-            url += "&in_reply_to_status_id=" + inReplyTo;
-        }
-        String successMessage = "Tweeted: \"" + encodedTweet + "\".";
-        String failureMessage = "Error trying to tweet: \"" + encodedTweet + "\".";
+            return tweet(restOfTweet, inReplyTo);
+        } else {
 
-        return post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
-                creds.getAccessToken(), creds.getAccessTokenSecret(), tweet);
+            String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
+            String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
+            if (inReplyTo != null) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {}
+                url += "&in_reply_to_status_id=" + inReplyTo;
+            }
+            String successMessage = "Tweeted: \"" + encodedTweet + "\".";
+            String failureMessage = "Error trying to tweet: \"" + encodedTweet + "\".";
+
+            return post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(),
+                    creds.getAccessToken(), creds.getAccessTokenSecret(), tweet);
+        }
     }
 
     public TweetResponseDTO tweet(String tweet) {

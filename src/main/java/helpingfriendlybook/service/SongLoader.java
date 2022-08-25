@@ -44,7 +44,7 @@ public class SongLoader {
                 songDTO.setNameLower(songName.toLowerCase());
 
                 if (cells.get(2).wholeText().contains("Found in Discography")) {
-                    LOG.warn(songName + "has never been played. It is only found in discography.");
+                    LOG.info(songName + " has never been played. It is only found in discography.");
                     continue;
                 }
                 if (cells.get(2).wholeText().contains("Alias of")) {

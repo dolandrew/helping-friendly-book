@@ -17,7 +17,6 @@ import java.io.IOException;
 
 import static helpingfriendlybook.service.PhishDotNetProxyService.getShowsFromResponse;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -53,9 +52,9 @@ public class OnThisDayServiceIntegrationTest {
                 .when(phishDotNetProxyService).getShowsForDate(anyInt(), anyInt(), isNull());
 
         TweetResponseDTO tweetResponse = new TweetResponseDTO();
-        tweetResponse.setId(2L);
+        tweetResponse.setId("2");
         doReturn(tweetResponse).when(twitterService).tweet(anyString());
-        doReturn(tweetResponse).when(twitterService).tweet(anyString(), anyLong());
+        doReturn(tweetResponse).when(twitterService).tweet(anyString(), anyString());
     }
 
     @Test
@@ -72,7 +71,8 @@ public class OnThisDayServiceIntegrationTest {
                 "#phish #phishcompanion "));
         verify(twitterService).tweet(contains("Set 1: Funky Bitch, Mustang Sally, Bag, Possum, JJLC, Sneakin' Sally, Alumni, LTJP, Alumni, 'A' Train, GTBT\n" +
                 "Set 2: Wilson, Slave, Corinna, Fire, Fluffhead, Divided, Curtis Loew, YEM, Sloth, Whipping Post\n" +
-                "Set 3: Fee, Lizards, Suzy, Golgi, Bike, BBFCFM, Camel Walk, Hood"), anyLong());
-        verify(twitterService).tweet(contains("This show contained the 1st known version of The Lizards."), anyLong());
+                "Set 3: Fee, Lizards, Suzy, Golgi, Bike, BBFCFM, Camel Walk, Hood\n" +
+                "Encore: Fee Reprise"), anyString());
+        verify(twitterService).tweet(contains("This show contained the 1st known tz of The Lizards."), anyString());
     }
 }
