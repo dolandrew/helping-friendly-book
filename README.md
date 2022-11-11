@@ -24,3 +24,17 @@ Helping Friendly Book has some other features that leverage the Twitter API:
 - Threaded tweets (tweets with replies)
 
 ![IMG_2115](https://user-images.githubusercontent.com/28452598/181653852-cf85cb39-95fc-4c61-9a75-d22c48362f0f.PNG)
+
+## To build and run with Gradle:
+
+```
+./gradlew build
+./gradlew bootRun
+```
+
+## To build and run with Docker:
+
+```
+docker build . -t helpingfriendlybook
+docker run helpingfriendlybook
+```

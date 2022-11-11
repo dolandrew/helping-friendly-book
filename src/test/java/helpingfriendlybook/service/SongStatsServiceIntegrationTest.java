@@ -5,15 +5,15 @@ import helpingfriendlybook.dto.DataDTO;
 import helpingfriendlybook.dto.TwitterResponseDTO;
 import io.restassured.RestAssured;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
         classes = HelpingFriendlyBookApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class SongStatsServiceIntegrationTest {
 
     @LocalServerPort
@@ -50,7 +50,7 @@ public class SongStatsServiceIntegrationTest {
      @MockBean
      private PhishDotNetProxyService phishDotNetProxyService;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
         RestAssured.port = serverPort;
