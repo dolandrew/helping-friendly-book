@@ -31,8 +31,8 @@ public class OnThisDayService {
 
     public OnThisDayService(PhishDotNetProxyService phishDotNetProxyService,
                             TwitterService twitterService,
-            GoogliTweeter googliTweeter,
-            TweetWriter tweetWriter) {
+                            GoogliTweeter googliTweeter,
+                            TweetWriter tweetWriter) {
         this.phishDotNetProxyService = phishDotNetProxyService;
         this.twitterService = twitterService;
         this.googliTweeter = googliTweeter;

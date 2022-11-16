@@ -24,7 +24,7 @@ public class Unfollower {
 
     private final TwitterService twitterService;
 
-    List<String> checkedUsers = new ArrayList<>();
+    private final List<String> checkedUsers = new ArrayList<>();
 
     @Value("${unfollower.threshold}")
     private Integer followerThreshold;
@@ -42,8 +42,12 @@ public class Unfollower {
             int showUserRequests = 0;
 
             String myUserName = "PhishCompanion";
-            List<String> friends = twitterService.getFriendsList(myUserName).stream().map(DataDTO::getScreenName).collect(toList());
-            List<String> followers = twitterService.getFollowersList(myUserName).stream().map(DataDTO::getScreenName).collect(toList());
+            var friends = twitterService.getFriendsList(myUserName).stream()
+                    .map(DataDTO::getScreenName)
+                    .toList();
+            var followers = twitterService.getFollowersList(myUserName).stream()
+                    .map(DataDTO::getScreenName)
+                    .toList();
             LOG.warn("Ratio: " + ((double) followers.size() / (double) friends.size()));
 
             for (String friend : friends) {
@@ -64,7 +68,7 @@ public class Unfollower {
                 tweetUnfollowedBatch(unfollowed);
             }
             LOG.warn("Finished checking users");
-            LOG.warn("Ratio: " + (((double) followers.size() - (double) unfollowed.size()) / (double) friends.size()));
+            LOG.warn("Ratio: " + ((double) followers.size() / ((double) friends.size() - (double) unfollowed.size())));
         } catch (Exception e) {
             googliTweeter.tweet("HFB caught exception trying to unfollow: " + e.getCause());
         }

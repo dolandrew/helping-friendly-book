@@ -35,6 +35,17 @@ public class PhishDotNetProxyService {
         return WordUtils.capitalize(venueRaw.toLowerCase(), ' ') + " ";
     }
 
+    public static List<Element> getShowsFromResponse(String response) {
+        Document doc = Jsoup.parse(response);
+        int setlists = doc.getElementsByClass("setlist").size();
+
+        if (setlists == 0) {
+            return emptyList();
+        }
+
+        return doc.getElementsByClass("setlist");
+    }
+
     public List<Element> getShowsForDate(Integer day, Integer month, Integer year) {
         LOG.info("Looking for shows on " + month + "-" + day + "...");
         String url = "https://phish.net/setlists/?month=" + month + "&day=" + day + (year != null ? "&year=" + year : "");
@@ -58,16 +69,5 @@ public class PhishDotNetProxyService {
 
     public String getSongs() {
         return restTemplate.getForObject("https://phish.net/song", String.class);
-    }
-
-    public static List<Element> getShowsFromResponse(String response) {
-        Document doc = Jsoup.parse(response);
-        int setlists = doc.getElementsByClass("setlist").size();
-
-        if (setlists == 0) {
-            return emptyList();
-        }
-
-        return doc.getElementsByClass("setlist");
     }
 }

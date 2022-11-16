@@ -176,7 +176,8 @@ public class TwitterService {
             if (inReplyTo != null) {
                 try {
                     Thread.sleep(1000);
-                } catch (InterruptedException e) {}
+                } catch (InterruptedException e) {
+                }
                 url += "&in_reply_to_status_id=" + inReplyTo;
             }
             String successMessage = "Tweeted: \"" + encodedTweet + "\".";

@@ -24,12 +24,12 @@ public class DataDTO {
         return author_id;
     }
 
-    public Boolean getFollowed_by() {
-        return followed_by;
-    }
-
     public void setAuthor_id(String author_id) {
         this.author_id = author_id;
+    }
+
+    public Boolean getFollowed_by() {
+        return followed_by;
     }
 
     public void setFollowed_by(Boolean followed_by) {

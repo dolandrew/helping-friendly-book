@@ -47,8 +47,8 @@ public class SongStatsServiceIntegrationTest {
     @MockBean
     private TimeApiService timeApiService;
 
-     @MockBean
-     private PhishDotNetProxyService phishDotNetProxyService;
+    @MockBean
+    private PhishDotNetProxyService phishDotNetProxyService;
 
     @BeforeEach
     public void setup() throws IOException {

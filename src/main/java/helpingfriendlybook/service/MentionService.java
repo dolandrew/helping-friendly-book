@@ -43,10 +43,10 @@ public class MentionService {
                 String[] dateParts;
                 Pattern pattern;
                 Matcher matcher;
-                if (tweet.getText().matches(".*[0-9]+/[0-9]+/[0-9]{4}.*")) {
-                    pattern = Pattern.compile("[0-9]+/[0-9]+/[0-9]{4}");
-                } else if (tweet.getText().matches(".*[0-9]+/[0-9]+/[0-9]{2}.*")) {
-                    pattern = Pattern.compile("[0-9]+/[0-9]+/[0-9]{2}");
+                if (tweet.getText().matches(".*\\d+/\\d+/\\d{4}.*")) {
+                    pattern = Pattern.compile("\\d+/\\d+/\\d{4}");
+                } else if (tweet.getText().matches(".*\\d+/\\d+/\\d{2}.*")) {
+                    pattern = Pattern.compile("\\d+/\\d+/\\d{2}");
                 } else {
                     continue;
                 }
