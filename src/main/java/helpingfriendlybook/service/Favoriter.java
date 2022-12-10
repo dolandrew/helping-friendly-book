@@ -24,7 +24,7 @@ public class Favoriter {
     private final GoogliTweeter googliTweeter;
 
     private final List<String> screenNamesToFavorite = List.of("PhishtoryToday", "YEMBlog", "PhishatMSG", "PhishRT", "PhishJustJams", "StadiumTourLife", "LivePhish", "Phish");
-        //YEMBlog
+
     private final TwitterService twitterService;
 
     private final List<String> userIdsToFavorite = List.of("2237218753", "16518086", "2202143780", "1492957487888281607", "3378157977", "1441291459018121220", "232312841", "14503997");

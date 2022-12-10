@@ -51,6 +51,21 @@ public class SongStatsService {
         this.timeApiService = timeApiService;
     }
 
+    public static String cleanSongName(String fetchedSongName) {
+        return fetchedSongName
+                .replaceAll("&gt; ", "")
+                .replaceAll("&gt;", "")
+                .replaceAll("> ", "")
+                .replaceAll(">", "")
+                .replaceAll("SET ONE: ", "")
+                .replaceAll("SET TWO: ", "")
+                .replaceAll("SET THREE: ", "")
+                .replaceAll("SET FOUR: ", "")
+                .replaceAll("SET FIVE: ", "")
+                .replaceAll("ENCORE TWO: ", "")
+                .replaceAll("ENCORE: ", "");
+    }
+
     @Scheduled(cron = "${cron.listen}")
     public void listenToPhishFTR() {
         try {
@@ -66,21 +81,6 @@ public class SongStatsService {
         } catch (Exception e) {
             googliTweeter.tweet("HFB caught exception: " + e.getMessage());
         }
-    }
-
-    public static String cleanSongName(String fetchedSongName) {
-        return fetchedSongName
-                .replaceAll("&gt; ", "")
-                .replaceAll("&gt;", "")
-                .replaceAll("> ", "")
-                .replaceAll(">", "")
-                .replaceAll("SET ONE: ", "")
-                .replaceAll("SET TWO: ", "")
-                .replaceAll("SET THREE: ", "")
-                .replaceAll("SET FOUR: ", "")
-                .replaceAll("SET FIVE: ", "")
-                .replaceAll("ENCORE TWO: ", "")
-                .replaceAll("ENCORE: ", "");
     }
 
     public void checkForSetStart(String tweet) {

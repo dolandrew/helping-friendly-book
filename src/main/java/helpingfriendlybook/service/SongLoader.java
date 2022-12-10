@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Integer.parseInt;
+
 @Component
 public class SongLoader {
     private static final Logger LOG = LoggerFactory.getLogger(SongLoader.class);
@@ -53,7 +55,7 @@ public class SongLoader {
                     songs.add(songDTO);
                     continue;
                 }
-                songDTO.setTimes(Integer.valueOf(cells.get(2).wholeText()));
+                songDTO.setTimes(parseInt(cells.get(2).wholeText()));
                 songDTO.setDebut(cells.get(3).wholeText());
                 songDTO.setLastPlayed(cells.get(4).wholeText());
                 Element gap = cells.get(5);
