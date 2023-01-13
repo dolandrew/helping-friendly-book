@@ -2,6 +2,7 @@ package helpingfriendlybook.service;
 
 import helpingfriendlybook.dto.TweetResponseDTO;
 import org.apache.commons.lang3.text.WordUtils;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import static helpingfriendlybook.service.PhishDotNetProxyService.getVenueOfShow;
@@ -25,38 +27,70 @@ public class OnThisDayService {
 
     private final PhishDotNetProxyService phishDotNetProxyService;
 
-    private final TweetWriter tweetWriter;
-
     private final TwitterService twitterService;
 
     public OnThisDayService(PhishDotNetProxyService phishDotNetProxyService,
                             TwitterService twitterService,
-            GoogliTweeter googliTweeter,
-            TweetWriter tweetWriter) {
+                            GoogliTweeter googliTweeter) {
         this.phishDotNetProxyService = phishDotNetProxyService;
         this.twitterService = twitterService;
         this.googliTweeter = googliTweeter;
-        this.tweetWriter = tweetWriter;
     }
 
     @Scheduled(cron = "${cron.shows}")
     public void tweetOnThisDayOrRandomShow() {
+        boolean alwaysRandom = false;
         try {
             ZonedDateTime today = OffsetDateTime.now().atZoneSameInstant(ZoneId.of("America/Los_Angeles"));
             List<Element> shows = phishDotNetProxyService.getShowsForDate(today.getDayOfMonth(), today.getMonthValue(), null);
-            if (!isEmpty(shows)) {
+            if (!alwaysRandom && !isEmpty(shows)) {
                 int random = new Random().nextInt(shows.size());
                 Element show = shows.get(random);
+                // TODO: filter out empty setlist or choose any
+                // "No known setlist".equals(element.getElementsByClass("setlist-body").get(0).getElementsByTag("p").get(0).wholeText())
                 tweetOnThisDay(show, null, "#OnThisDay\n");
             } else {
-                tweetRandomShow();
+                LOG.warn("Tweeting a #RandomShow...");
+                Element show = phishDotNetProxyService.getRandomShow();
+                tweetTheShow(show, "#RandomShow\n", null);
             }
         } catch (Exception e) {
-            googliTweeter.tweet("Caught exception trying to post shows on this day!", e.getCause());
+            googliTweeter.tweet("Caught exception trying to post show on this day.", e);
         }
     }
 
-    public String getSetlist(Element element) {
+    public void tweetOnThisDay(Element show, String inReplyTo, String tweet) {
+        LOG.warn("Tweeting OnThisDay...");
+        tweetTheShow(show, tweet, inReplyTo);
+    }
+
+    private void tweetTheShow(Element show, String tweet, String inReplyTo) {
+        StringBuilder builder = new StringBuilder(tweet)
+                .append(getDate(show)).append("\n")
+                .append(getVenueOfShow(show)).append(getLocation(show)).append("\n");
+
+        String setlistLink = getSetlistLink(show);
+        builder.append(setlistLink).append("\n\n");
+        Document doc = phishDotNetProxyService.getShow(setlistLink);
+        builder.append(getRating(doc)).append("\n")
+                .append(getListenLink(doc)).append("\n").append("\n");
+
+        builder.append(getShowHashtags());
+
+        TweetResponseDTO tweetResponseDTO = twitterService.tweet(builder.toString(), inReplyTo);
+        try {
+            tweetResponseDTO = twitterService.tweet(getSetlist(show), tweetResponseDTO.getId());
+            twitterService.tweet(getSetlistNotes(show), tweetResponseDTO.getId());
+        } catch (IndexOutOfBoundsException e) {
+            throw new RuntimeException("TODO: fix bug - shows on this day without setlist");
+        }
+    }
+
+    private String getShowHashtags() {
+        return "#phish #phishcompanion #otd" + OffsetDateTime.now().getYear();
+    }
+
+    private String getSetlist(Element element) {
         Element setlistBody = element.getElementsByClass("setlist-body").get(0);
         List<Element> sets = setlistBody.getElementsByClass("set-label");
         String setlist = "";
@@ -79,38 +113,31 @@ public class OnThisDayService {
         return setlist;
     }
 
-    private String addActualDate(Element element, String tweet) {
+    private String getDate(Element element) {
         String actualDate = element
                 .getElementsByClass("setlist-date-long").get(0)
                 .getElementsByTag("a").get(1)
-                .wholeText();
-        tweet += WordUtils.capitalize(actualDate.toLowerCase(), ' ') + "\n";
-        return tweet;
+                .wholeText().replaceAll("[a-zA-Z ]", "");
+        if (actualDate.startsWith("0")) {
+            actualDate = actualDate.substring(1);
+        }
+        return WordUtils.capitalize(actualDate.toLowerCase(), ' ');
     }
 
-    private String addLink(Element element, String tweet) {
-        String link = "phish.net" + element
+    private String getSetlistLink(Element element) {
+        return "phish.net" + element
                 .getElementsByClass("setlist-date-long").get(0)
                 .getElementsByTag("a").get(1)
                 .attr("href");
-        tweet += link + "\n\n";
-        return tweet;
     }
 
-    private String addLocation(Element element, String tweet) {
+    private String getLocation(Element element) {
         String location = element
                 .getElementsByClass("setlist-location").get(0)
                 .wholeText()
                 .replace("\n", "")
                 .replace("\t", "");
-        tweet += location.replaceAll(",", ", ") + " " + " \n";
-        return tweet;
-    }
-
-    private String addVenue(Element element, String tweet) {
-        String venue = getVenueOfShow(element);
-        tweet += venue;
-        return tweet;
+        return location.replaceAll(",", ", ") + " ";
     }
 
     private String getSetlistNotes(Element element) {
@@ -153,7 +180,7 @@ public class OnThisDayService {
     }
 
     private String getSetlistSet(List<Element> sets, int index, String setlist, String setlist1) {
-        List<Element> songs = sets.get(index).parent().getElementsByClass("setlist-song");
+        List<Element> songs = Objects.requireNonNull(sets.get(index).parent()).getElementsByClass("setlist-song");
         setlist += setlist1;
         for (Element song : songs) {
             setlist += song.wholeText() + ", ";
@@ -162,46 +189,23 @@ public class OnThisDayService {
         return setlist;
     }
 
-    public void tweetOnThisDay(Element show, String inReplyTo, String tweet) {
-        LOG.warn("Tweeting OnThisDay...");
-        if (inReplyTo != null) {
-            tweetTheShowInReply(show, tweet, inReplyTo);
-        } else {
-            tweetTheShow(show, tweet);
+    private String getRating(Document doc) {
+        try {
+            return doc.getElementsByClass("permalink-rating").get(0).child(1).wholeText().replaceAll("Overall: ", "⭐ ");
+        } catch (Exception e) {
+            return "";
         }
     }
 
-    private void tweetRandomShow() {
-        LOG.warn("Tweeting a random setlist...");
-        Element show = phishDotNetProxyService.getRandomShow();
-        String tweet = "#RandomShow\n";
-        tweetTheShow(show, tweet);
-    }
-
-    private void tweetTheShow(Element show, String tweet) {
-        tweet = addActualDate(show, tweet);
-        tweet = addVenue(show, tweet);
-        tweet = addLocation(show, tweet);
-        tweet = addLink(show, tweet);
-        // TODO: add link to relisten, phish'n, phishtracks
-        tweet = tweetWriter.addShowHashtags(tweet);
-
-        TweetResponseDTO tweetResponseDTO = twitterService.tweet(tweet);
-        tweetResponseDTO = twitterService.tweet(getSetlist(show), tweetResponseDTO.getId());
-        twitterService.tweet(getSetlistNotes(show), tweetResponseDTO.getId());
-    }
-
-    private void tweetTheShowInReply(Element show, String tweet, String inReplyTo) {
-        String username = tweet;
-        tweet = addActualDate(show, tweet);
-        tweet = addVenue(show, tweet);
-        tweet = addLocation(show, tweet);
-        tweet = addLink(show, tweet);
-        // TODO: add link to relisten, phish'n, phishtracks
-        tweet = tweetWriter.addShowReplyHashtags(tweet);
-
-        twitterService.tweet(username + tweet, inReplyTo);
-        twitterService.tweet(username + getSetlist(show), inReplyTo);
-        twitterService.tweet(username + getSetlistNotes(show), inReplyTo);
+    private String getListenLink(Document doc) {
+        try {
+            String listenLink = doc.getElementsByClass("linktrack").get(0).attr("href");
+            if (!listenLink.contains("phish.in")) {
+                return "";
+            }
+            return listenLink;
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

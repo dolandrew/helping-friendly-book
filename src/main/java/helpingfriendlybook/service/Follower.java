@@ -39,10 +39,10 @@ public class Follower {
                 }
                 googliTweeter.tweet(".@PhishCompanion requested to follow " + usersFollowed + " users at " + new Date() + ".");
             } else {
-                googliTweeter.tweet("HFB was unable to fetch tweets!");
+                googliTweeter.tweet("HFB was unable to fetch tweets. Did not receive 200 from twitter api call.");
             }
         } catch (Exception e) {
-            googliTweeter.tweet("HFB caught exception: " + e.getCause());
+            googliTweeter.tweet("HFB caught exception following users: ", e);
         }
     }
 }

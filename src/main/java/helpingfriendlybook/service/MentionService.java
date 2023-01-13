@@ -34,7 +34,7 @@ public class MentionService {
         this.onThisDayService = onThisDayService;
     }
 
-    @Scheduled(cron = "*/30 * * * * *")
+    @Scheduled(cron = "${cron.mentions}")
     public void checkForMentions() {
         LOG.info("Checking for mentions...");
         ResponseEntity<TwitterResponseDTO> mentions = twitterService.getMentionsForUserIdInLast(PHISH_COMPANION_USER_ID, TwitterService.getThirtySecondsAgo());

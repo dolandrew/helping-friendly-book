@@ -14,13 +14,20 @@ public class CaffeineService {
 
     private final RestTemplate restTemplate;
 
-    public CaffeineService(RestTemplate restTemplate) {
+    private final GoogliTweeter googliTweeter;
+
+    public CaffeineService(RestTemplate restTemplate, GoogliTweeter googliTweeter) {
         this.restTemplate = restTemplate;
+        this.googliTweeter = googliTweeter;
     }
 
     @Scheduled(cron = "0 */15 * * * *")
     public void caffeinate() {
         LOG.warn("Caffeinating...");
-        restTemplate.getForObject("http://" + APP_NAME + ".herokuapp.com/index.html", String.class);
+        try {
+            restTemplate.getForObject("http://" + APP_NAME + ".herokuapp.com/index.html", String.class);
+        } catch (Exception e) {
+            googliTweeter.tweet("Is HFB down? Caught exception: ", e);
+        }
     }
 }

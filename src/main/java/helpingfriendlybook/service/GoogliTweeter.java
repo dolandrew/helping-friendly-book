@@ -26,8 +26,11 @@ public class GoogliTweeter {
     }
 
     public void tweet(String tweet, Throwable e) {
-        LOG.warn("@GoogliApparatus tweeted: \"" + tweet + "\"", e);
-        twitterService.tweet(tweet + ": " + e.getCause() + "\n\n" + System.currentTimeMillis(),
+        LOG.error("@GoogliApparatus tweeted: \"" + tweet + "\"", e);
+
+        String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
+
+        twitterService.tweet(tweet + ": " + message + "\n\n" + System.currentTimeMillis(),
                 googliConfig.getApiKey(), googliConfig.getApiKeySecret(),
                 googliConfig.getAccessToken(), googliConfig.getAccessTokenSecret());
     }

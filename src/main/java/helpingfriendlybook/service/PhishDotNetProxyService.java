@@ -4,6 +4,7 @@ import org.apache.commons.lang3.text.WordUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -35,6 +36,11 @@ public class PhishDotNetProxyService {
         return WordUtils.capitalize(venueRaw.toLowerCase(), ' ') + " ";
     }
 
+    public static Elements getShowsFromResponse(String response) {
+        Document doc = Jsoup.parse(response);
+        return doc.getElementsByClass("setlist");
+    }
+
     public List<Element> getShowsForDate(Integer day, Integer month, Integer year) {
         LOG.info("Looking for shows on " + month + "-" + day + "...");
         String url = "https://phish.net/setlists/?month=" + month + "&day=" + day + (year != null ? "&year=" + year : "");
@@ -48,7 +54,11 @@ public class PhishDotNetProxyService {
         return getShowsWithAbbreviatedSetlists(url).get(0);
     }
 
-    private List<Element> getShowsWithAbbreviatedSetlists(String url) {
+    public String getSongs() {
+        return restTemplate.getForObject("https://phish.net/song", String.class);
+    }
+
+    private Elements getShowsWithAbbreviatedSetlists(String url) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Cookie", " songabbr=on; ");
         HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(httpHeaders);
@@ -56,18 +66,8 @@ public class PhishDotNetProxyService {
         return getShowsFromResponse(response.getBody());
     }
 
-    public String getSongs() {
-        return restTemplate.getForObject("https://phish.net/song", String.class);
-    }
-
-    public static List<Element> getShowsFromResponse(String response) {
-        Document doc = Jsoup.parse(response);
-        int setlists = doc.getElementsByClass("setlist").size();
-
-        if (setlists == 0) {
-            return emptyList();
-        }
-
-        return doc.getElementsByClass("setlist");
+    Document getShow(String url) {
+        ResponseEntity<String> response = restTemplate.exchange("http://" + url, GET, null, String.class);
+        return Jsoup.parse(response.getBody());
     }
 }

@@ -51,23 +51,6 @@ public class SongStatsService {
         this.timeApiService = timeApiService;
     }
 
-    @Scheduled(cron = "${cron.listen}")
-    public void listenToPhishFTR() {
-        try {
-            var tweets = twitterService.getTweetsForUserIdInLast(phishFTRid, getOneMinuteAgo());
-            String songName = processIncomingTweet(tweets);
-            if (songName != null) {
-                if (songName.equals(ignoredSong)) {
-                    googliTweeter.tweet("Ignored expected song: " + ignoredSong);
-                } else {
-                    processOutgoingTweet(songName);
-                }
-            }
-        } catch (Exception e) {
-            googliTweeter.tweet("HFB caught exception: " + e.getMessage());
-        }
-    }
-
     public static String cleanSongName(String fetchedSongName) {
         return fetchedSongName
                 .replaceAll("&gt; ", "")
@@ -81,6 +64,23 @@ public class SongStatsService {
                 .replaceAll("SET FIVE: ", "")
                 .replaceAll("ENCORE TWO: ", "")
                 .replaceAll("ENCORE: ", "");
+    }
+
+    @Scheduled(cron = "${cron.listen}")
+    public void listenToPhishFTR() {
+        try {
+            var tweets = twitterService.getTweetsForUserIdInLast(phishFTRid, getOneMinuteAgo());
+            String songName = processIncomingTweet(tweets);
+            if (songName != null) {
+                if (songName.equals(ignoredSong)) {
+                    googliTweeter.tweet("Ignored expected song: " + ignoredSong);
+                } else {
+                    processOutgoingTweet(songName);
+                }
+            }
+        } catch (Exception e) {
+            googliTweeter.tweet("HFB exception while listening: ", e);
+        }
     }
 
     public void checkForSetStart(String tweet) {

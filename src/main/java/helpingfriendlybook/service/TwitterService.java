@@ -1,6 +1,7 @@
 package helpingfriendlybook.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import helpingfriendlybook.config.GoogliConfig;
 import helpingfriendlybook.config.HFBConfig;
 import helpingfriendlybook.dto.DataDTO;
 import helpingfriendlybook.dto.TweetResponseDTO;
@@ -48,11 +49,15 @@ public class TwitterService {
 
     private final ObjectMapper objectMapper;
 
-    public TwitterService(RestTemplate restTemplate, Environment environment, HFBConfig creds, ObjectMapper objectMapper) {
+    private final GoogliConfig googliConfig;
+
+    public TwitterService(RestTemplate restTemplate, Environment environment, HFBConfig creds,
+                          ObjectMapper objectMapper, GoogliConfig googliConfig) {
         this.restTemplate = restTemplate;
         this.environment = environment;
         this.creds = creds;
         this.objectMapper = objectMapper;
+        this.googliConfig = googliConfig;
     }
 
     public static String getOneMinuteAgo() {
@@ -153,7 +158,7 @@ public class TwitterService {
     }
 
     public void tweet(String tweet, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret) {
-        String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset());
+        String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset()).substring(0, Math.min(tweet.length(), 279));
         String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
         String failureMessage = "Error trying to tweet: \"" + tweet + "\".";
 
@@ -242,6 +247,10 @@ public class TwitterService {
                 LOG.warn(successMessage);
             }
         } catch (Exception e) {
+            LOG.error("@GoogliApparatus tweeted: \"" + tweet + "\"", e);
+            tweet(tweet + ": " + e.getCause() == null ? e.getMessage() : e.getCause() + "\n\n" + System.currentTimeMillis(),
+                    googliConfig.getApiKey(), googliConfig.getApiKeySecret(),
+                    googliConfig.getAccessToken(), googliConfig.getAccessTokenSecret());
             LOG.error(failureMessage, e);
         }
         return null;

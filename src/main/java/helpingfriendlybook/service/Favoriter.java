@@ -71,7 +71,7 @@ public class Favoriter {
                     }
                 }
             } catch (Exception e) {
-                googliTweeter.tweet("HFB caught exception: " + e.getMessage());
+                googliTweeter.tweet("HFB caught exception: ", e);
             }
             index = (i + 1) % userIdsToFavorite.size();
             if (tweetsLiked > 0 || tries == userIdsToFavorite.size()) {

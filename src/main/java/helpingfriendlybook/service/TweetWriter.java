@@ -15,10 +15,6 @@ public class TweetWriter {
     @Value("${custom.hashtags}")
     private String customHashtags;
 
-    public String addShowHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishcompanion #otd" + OffsetDateTime.now().getYear();
-    }
-
     public String addShowReplyHashtags(String tweet) {
         return tweet + "\n\n#phish #phishcompanion #" + System.currentTimeMillis()/1000000;
     }

@@ -66,7 +66,7 @@ public class Unfollower {
             LOG.warn("Finished checking users");
             LOG.warn("Ratio: " + (((double) followers.size() - (double) unfollowed.size()) / (double) friends.size()));
         } catch (Exception e) {
-            googliTweeter.tweet("HFB caught exception trying to unfollow: " + e.getCause());
+            googliTweeter.tweet("HFB caught exception trying to unfollow: ", e);
         }
         tweetUnfollowedRemaining(unfollowed);
     }
