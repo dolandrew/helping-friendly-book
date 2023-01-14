@@ -34,7 +34,9 @@ public class OneTimeSongTweeter {
     @Value("${one.time.song}")
     private String oneTimeSong;
 
-    public OneTimeSongTweeter(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter, TwitterService twitterService, Environment environment, SongStatsService songStatsService) {
+    public OneTimeSongTweeter(final MetadataAssembler metadataAssembler, final TweetWriter tweetWriter,
+                              final GoogliTweeter googliTweeter, final TwitterService twitterService,
+                              final Environment environment, final SongStatsService songStatsService) {
         this.metadataAssembler = metadataAssembler;
         this.tweetWriter = tweetWriter;
         this.googliTweeter = googliTweeter;

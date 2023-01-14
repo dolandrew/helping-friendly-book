@@ -18,7 +18,7 @@ import static java.lang.Integer.parseInt;
 
 @EnableScheduling
 @Service
-public class SongStatsService {
+public final class SongStatsService {
     private static final Logger LOG = LoggerFactory.getLogger(SongStatsService.class);
 
     private final GoogliTweeter googliTweeter;
@@ -42,16 +42,16 @@ public class SongStatsService {
     @Value("${twitter.phish.ftr.id}")
     private String phishFTRid;
 
-    public SongStatsService(MetadataAssembler metadataAssembler, TweetWriter tweetWriter, GoogliTweeter googliTweeter,
-                            TwitterService twitterService, TimeApiService timeApiService) {
-        this.metadataAssembler = metadataAssembler;
-        this.tweetWriter = tweetWriter;
-        this.googliTweeter = googliTweeter;
-        this.twitterService = twitterService;
-        this.timeApiService = timeApiService;
+    public SongStatsService(final MetadataAssembler assembler, final TweetWriter tw, final GoogliTweeter googli,
+                            final TwitterService ts, final TimeApiService tApiService) {
+        this.metadataAssembler = assembler;
+        this.tweetWriter = tw;
+        this.googliTweeter = googli;
+        this.twitterService = ts;
+        this.timeApiService = tApiService;
     }
 
-    public static String cleanSongName(String fetchedSongName) {
+    public static String cleanSongName(final String fetchedSongName) {
         return fetchedSongName
                 .replaceAll("&gt; ", "")
                 .replaceAll("&gt;", "")
@@ -83,7 +83,7 @@ public class SongStatsService {
         }
     }
 
-    public void checkForSetStart(String tweet) {
+    public void checkForSetStart(final String tweet) {
         if (tweet.contains("SET ONE:") || tweet.toLowerCase(Locale.ROOT).contains("set one:")) {
             tweetSetStart("SET ONE", "\uD83C\uDF89");
         } else if (tweet.contains("SET TWO:") || tweet.toLowerCase(Locale.ROOT).contains("set two:")) {
@@ -95,7 +95,7 @@ public class SongStatsService {
         }
     }
 
-    private String processIncomingTweet(ResponseEntity<TwitterResponseDTO> responseEntity) {
+    private String processIncomingTweet(final ResponseEntity<TwitterResponseDTO> responseEntity) {
         String cleanedSongName = null;
         TwitterResponseDTO body = responseEntity.getBody();
         if (body != null) {
@@ -122,17 +122,17 @@ public class SongStatsService {
         return cleanedSongName;
     }
 
-    private void processOutgoingTweet(String songName) {
+    private void processOutgoingTweet(final String songName) {
         SongDTO songDTO = metadataAssembler.assembleMetadata(songName);
         String tweet = tweetWriter.writeSongStatsTweet(songDTO, bustoutThreshold);
         twitterService.tweet(tweet);
     }
 
-    private boolean sameTweet(String fetchedSongName) {
+    private boolean sameTweet(final String fetchedSongName) {
         return fetchedSongName.equals(currentSongName);
     }
 
-    private boolean shouldIgnoreTweet(String fetchedSongName) {
+    private boolean shouldIgnoreTweet(final String fetchedSongName) {
         if (fetchedSongName == null) {
             LOG.warn("Skipping empty tweet");
             return true;
@@ -153,7 +153,7 @@ public class SongStatsService {
         return false;
     }
 
-    private void tweetSetStart(String setName, String emoji) {
+    private void tweetSetStart(final String setName, final String emoji) {
         String timeInNewYork = timeApiService.getTimeInNewYork();
         String[] timeParts = timeInNewYork.split(":");
         int hour = parseInt(timeParts[0]) % 12;

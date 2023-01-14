@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
-public class MentionService {
+public final class MentionService {
     private static final Logger LOG = LoggerFactory.getLogger(MentionService.class);
 
     private final TwitterService twitterService;
@@ -28,10 +28,10 @@ public class MentionService {
 
     private final String PHISH_COMPANION_USER_ID = "1435725956371550213";
 
-    public MentionService(TwitterService twitterService, PhishDotNetProxyService phishDotNetProxyService, OnThisDayService onThisDayService) {
-        this.twitterService = twitterService;
-        this.phishDotNetProxyService = phishDotNetProxyService;
-        this.onThisDayService = onThisDayService;
+    public MentionService(final TwitterService ts, final PhishDotNetProxyService proxyService, final OnThisDayService otdService) {
+        this.twitterService = ts;
+        this.phishDotNetProxyService = proxyService;
+        this.onThisDayService = otdService;
     }
 
     @Scheduled(cron = "${cron.mentions}")

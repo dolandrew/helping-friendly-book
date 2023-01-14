@@ -20,7 +20,7 @@ import static helpingfriendlybook.service.PhishDotNetProxyService.getVenueOfShow
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
-public class OnThisDayService {
+public final class OnThisDayService {
     private static final Logger LOG = LoggerFactory.getLogger(OnThisDayService.class);
 
     private final GoogliTweeter googliTweeter;
@@ -29,12 +29,12 @@ public class OnThisDayService {
 
     private final TwitterService twitterService;
 
-    public OnThisDayService(PhishDotNetProxyService phishDotNetProxyService,
-                            TwitterService twitterService,
-                            GoogliTweeter googliTweeter) {
-        this.phishDotNetProxyService = phishDotNetProxyService;
-        this.twitterService = twitterService;
-        this.googliTweeter = googliTweeter;
+    public OnThisDayService(final PhishDotNetProxyService proxyService,
+                            final TwitterService ts,
+                            final GoogliTweeter googli) {
+        this.phishDotNetProxyService = proxyService;
+        this.twitterService = ts;
+        this.googliTweeter = googli;
     }
 
     @Scheduled(cron = "${cron.shows}")
@@ -59,12 +59,12 @@ public class OnThisDayService {
         }
     }
 
-    public void tweetOnThisDay(Element show, String inReplyTo, String tweet) {
+    public void tweetOnThisDay(final Element show, final String inReplyTo, final String tweet) {
         LOG.warn("Tweeting OnThisDay...");
         tweetTheShow(show, tweet, inReplyTo);
     }
 
-    private void tweetTheShow(Element show, String tweet, String inReplyTo) {
+    private void tweetTheShow(final Element show, final String tweet, final String inReplyTo) {
         StringBuilder builder = new StringBuilder(tweet)
                 .append(getDate(show)).append("\n")
                 .append(getVenueOfShow(show)).append(getLocation(show)).append("\n");
@@ -90,7 +90,7 @@ public class OnThisDayService {
         return "#phish #phishcompanion #otd" + OffsetDateTime.now().getYear();
     }
 
-    private String getSetlist(Element element) {
+    private String getSetlist(final Element element) {
         Element setlistBody = element.getElementsByClass("setlist-body").get(0);
         List<Element> sets = setlistBody.getElementsByClass("set-label");
         String setlist = "";
@@ -113,7 +113,7 @@ public class OnThisDayService {
         return setlist;
     }
 
-    private String getDate(Element element) {
+    private String getDate(final Element element) {
         String actualDate = element
                 .getElementsByClass("setlist-date-long").get(0)
                 .getElementsByTag("a").get(1)
@@ -124,14 +124,14 @@ public class OnThisDayService {
         return WordUtils.capitalize(actualDate.toLowerCase(), ' ');
     }
 
-    private String getSetlistLink(Element element) {
+    private String getSetlistLink(final Element element) {
         return "phish.net" + element
                 .getElementsByClass("setlist-date-long").get(0)
                 .getElementsByTag("a").get(1)
                 .attr("href");
     }
 
-    private String getLocation(Element element) {
+    private String getLocation(final Element element) {
         String location = element
                 .getElementsByClass("setlist-location").get(0)
                 .wholeText()
@@ -140,7 +140,7 @@ public class OnThisDayService {
         return location.replaceAll(",", ", ") + " ";
     }
 
-    private String getSetlistNotes(Element element) {
+    private String getSetlistNotes(final Element element) {
         String setlistNotes = element.getElementsByClass("setlist-notes").get(0).wholeText();
         return setlistNotes.replace("NBSP", "")
                 .replace("\n", "")
@@ -179,7 +179,7 @@ public class OnThisDayService {
                 .replace("\r", "");
     }
 
-    private String getSetlistSet(List<Element> sets, int index, String setlist, String setlist1) {
+    private String getSetlistSet(final List<Element> sets, final int index, String setlist, final String setlist1) {
         List<Element> songs = Objects.requireNonNull(sets.get(index).parent()).getElementsByClass("setlist-song");
         setlist += setlist1;
         for (Element song : songs) {
@@ -189,7 +189,7 @@ public class OnThisDayService {
         return setlist;
     }
 
-    private String getRating(Document doc) {
+    private String getRating(final Document doc) {
         try {
             return doc.getElementsByClass("permalink-rating").get(0).child(1).wholeText().replaceAll("Overall: ", "⭐ ");
         } catch (Exception e) {
@@ -197,7 +197,7 @@ public class OnThisDayService {
         }
     }
 
-    private String getListenLink(Document doc) {
+    private String getListenLink(final Document doc) {
         try {
             String listenLink = doc.getElementsByClass("linktrack").get(0).attr("href");
             if (!listenLink.contains("phish.in")) {

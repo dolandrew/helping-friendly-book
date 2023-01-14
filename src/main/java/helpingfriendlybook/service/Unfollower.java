@@ -15,7 +15,7 @@ import static java.util.stream.Collectors.toList;
 
 @EnableScheduling
 @Service
-public class Unfollower {
+public final class Unfollower {
     private static final Logger LOG = LoggerFactory.getLogger(Unfollower.class);
 
     private final GoogliTweeter googliTweeter;
@@ -24,14 +24,14 @@ public class Unfollower {
 
     private final TwitterService twitterService;
 
-    List<String> checkedUsers = new ArrayList<>();
+    private final List<String> checkedUsers = new ArrayList<>();
 
     @Value("${unfollower.threshold}")
-    private Integer followerThreshold;
+    private static Integer followerThreshold;
 
-    public Unfollower(GoogliTweeter googliTweeter, TwitterService twitterService) {
-        this.googliTweeter = googliTweeter;
-        this.twitterService = twitterService;
+    public Unfollower(GoogliTweeter googli, TwitterService ts) {
+        this.googliTweeter = googli;
+        this.twitterService = ts;
     }
 
     @Scheduled(cron = "${cron.unfollow}")
@@ -71,18 +71,18 @@ public class Unfollower {
         tweetUnfollowedRemaining(unfollowed);
     }
 
-    private void tweetUnfollowed(List<String> unfollowed) {
+    private void tweetUnfollowed(final List<String> unfollowed) {
         googliTweeter.tweet("PhishCompanion unfollowed @" + String.join(", @", unfollowed) + " (< " + followerThreshold + " followers)");
     }
 
-    private void tweetUnfollowedBatch(List<String> unfollowed) {
+    private void tweetUnfollowedBatch(final List<String> unfollowed) {
         if (unfollowed.size() == 4) {
             tweetUnfollowed(unfollowed);
             unfollowed.clear();
         }
     }
 
-    private void tweetUnfollowedRemaining(List<String> unfollowed) {
+    private void tweetUnfollowedRemaining(final List<String> unfollowed) {
         if (!unfollowed.isEmpty()) {
             tweetUnfollowed(unfollowed);
         }

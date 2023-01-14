@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class CaffeineService {
+public final class CaffeineService {
     private static final String APP_NAME = "helping-friendly-book";
 
     private static final Logger LOG = LoggerFactory.getLogger(CaffeineService.class);
@@ -16,9 +16,9 @@ public class CaffeineService {
 
     private final GoogliTweeter googliTweeter;
 
-    public CaffeineService(RestTemplate restTemplate, GoogliTweeter googliTweeter) {
-        this.restTemplate = restTemplate;
-        this.googliTweeter = googliTweeter;
+    public CaffeineService(final RestTemplate template, final GoogliTweeter googli) {
+        this.restTemplate = template;
+        this.googliTweeter = googli;
     }
 
     @Scheduled(cron = "0 */15 * * * *")

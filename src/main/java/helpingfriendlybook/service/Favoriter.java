@@ -37,9 +37,9 @@ public class Favoriter {
 
     private int index = 2;
 
-    public Favoriter(GoogliTweeter googliTweeter, TwitterService twitterService) {
-        this.googliTweeter = googliTweeter;
-        this.twitterService = twitterService;
+    public Favoriter(GoogliTweeter googli, TwitterService ts) {
+        this.googliTweeter = googli;
+        this.twitterService = ts;
     }
 
     @Scheduled(cron = "${cron.favorite}")

@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
-import static java.util.Collections.emptyList;
 import static org.springframework.http.HttpMethod.GET;
 
 @Service
@@ -24,11 +23,11 @@ public class PhishDotNetProxyService {
 
     private final RestTemplate restTemplate;
 
-    public PhishDotNetProxyService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public PhishDotNetProxyService(final RestTemplate template) {
+        this.restTemplate = template;
     }
 
-    public static String getVenueOfShow(Element element) {
+    public static String getVenueOfShow(final Element element) {
         String venueRaw = element
                 .getElementsByClass("setlist-venue").get(0)
                 .getElementsByTag("span").get(0)
@@ -36,12 +35,12 @@ public class PhishDotNetProxyService {
         return WordUtils.capitalize(venueRaw.toLowerCase(), ' ') + " ";
     }
 
-    public static Elements getShowsFromResponse(String response) {
+    public static Elements getShowsFromResponse(final String response) {
         Document doc = Jsoup.parse(response);
         return doc.getElementsByClass("setlist");
     }
 
-    public List<Element> getShowsForDate(Integer day, Integer month, Integer year) {
+    public List<Element> getShowsForDate(final Integer day, final Integer month, final Integer year) {
         LOG.info("Looking for shows on " + month + "-" + day + "...");
         String url = "https://phish.net/setlists/?month=" + month + "&day=" + day + (year != null ? "&year=" + year : "");
         List<Element> shows = getShowsWithAbbreviatedSetlists(url);
@@ -58,7 +57,7 @@ public class PhishDotNetProxyService {
         return restTemplate.getForObject("https://phish.net/song", String.class);
     }
 
-    private Elements getShowsWithAbbreviatedSetlists(String url) {
+    private Elements getShowsWithAbbreviatedSetlists(final String url) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Cookie", " songabbr=on; ");
         HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(httpHeaders);
@@ -66,7 +65,7 @@ public class PhishDotNetProxyService {
         return getShowsFromResponse(response.getBody());
     }
 
-    Document getShow(String url) {
+    Document getShow(final String url) {
         ResponseEntity<String> response = restTemplate.exchange("http://" + url, GET, null, String.class);
         return Jsoup.parse(response.getBody());
     }

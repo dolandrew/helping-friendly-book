@@ -13,19 +13,19 @@ public class GoogliTweeter {
 
     private final TwitterService twitterService;
 
-    public GoogliTweeter(GoogliConfig googliConfig, TwitterService twitterService) {
-        this.googliConfig = googliConfig;
-        this.twitterService = twitterService;
+    public GoogliTweeter(final GoogliConfig config, final TwitterService ts) {
+        this.googliConfig = config;
+        this.twitterService = ts;
     }
 
-    public void tweet(String tweet) {
+    public void tweet(final String tweet) {
         LOG.warn("@GoogliApparatus tweeted: \"" + tweet + "\"");
         twitterService.tweet(tweet + "\n\n" + System.currentTimeMillis(),
                 googliConfig.getApiKey(), googliConfig.getApiKeySecret(),
                 googliConfig.getAccessToken(), googliConfig.getAccessTokenSecret());
     }
 
-    public void tweet(String tweet, Throwable e) {
+    public void tweet(final String tweet, final Throwable e) {
         LOG.error("@GoogliApparatus tweeted: \"" + tweet + "\"", e);
 
         String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();

@@ -51,13 +51,13 @@ public class TwitterService {
 
     private final GoogliConfig googliConfig;
 
-    public TwitterService(RestTemplate restTemplate, Environment environment, HFBConfig creds,
-                          ObjectMapper objectMapper, GoogliConfig googliConfig) {
-        this.restTemplate = restTemplate;
-        this.environment = environment;
+    public TwitterService(final RestTemplate template, final Environment env, final HFBConfig creds,
+                          final ObjectMapper mapper, final GoogliConfig gConfig) {
+        this.restTemplate = template;
+        this.environment = env;
         this.creds = creds;
-        this.objectMapper = objectMapper;
-        this.googliConfig = googliConfig;
+        this.objectMapper = mapper;
+        this.googliConfig = gConfig;
     }
 
     public static String getOneMinuteAgo() {
@@ -70,12 +70,12 @@ public class TwitterService {
         return ZonedDateTime.now(ZoneId.of("UTC")).minus(30, SECONDS).format(formatter);
     }
 
-    public static String getSomeHoursAgo(int intervalHours) {
+    public static String getSomeHoursAgo(final int intervalHours) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss'Z'");
         return ZonedDateTime.now(ZoneId.of("UTC")).minus(intervalHours, HOURS).format(formatter);
     }
 
-    public void favoriteTweetById(String id) {
+    public void favoriteTweetById(final String id) {
         String url = "https://api.twitter.com/1.1/favorites/create.json?id=" + id;
         String successMessage = "Successfully liked tweet.";
         String failureMessage = "Error trying to like tweet.";
@@ -83,7 +83,7 @@ public class TwitterService {
         post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(), creds.getAccessToken(), creds.getAccessTokenSecret(), null);
     }
 
-    public Integer followFavoritesById(String tweetId) {
+    public Integer followFavoritesById(final String tweetId) {
         String url = "https://api.twitter.com/2/tweets/" + tweetId + " /liking_users";
         var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
         if (response.getBody() != null && response.getBody().getData() != null) {
@@ -93,7 +93,7 @@ public class TwitterService {
         return 0;
     }
 
-    public List<DataDTO> getFollowersList(String username) {
+    public List<DataDTO> getFollowersList(final String username) {
         LOG.info("Getting followers for " + username + "...");
         Long cursor = -1L;
         List<DataDTO> users = new ArrayList<>();
@@ -107,7 +107,7 @@ public class TwitterService {
         return users;
     }
 
-    public List<DataDTO> getFriendsList(String username) {
+    public List<DataDTO> getFriendsList(final String username) {
         LOG.info("Getting friends for " + username + "...");
         Long cursor = -1L;
         List<DataDTO> users = new ArrayList<>();
@@ -121,43 +121,43 @@ public class TwitterService {
         return users;
     }
 
-    public TwitterUserResponseDTO getUserById(String userId) {
+    public TwitterUserResponseDTO getUserById(final String userId) {
         LOG.info("Getting user " + userId + " by id...");
         String url = "https://api.twitter.com/2/users/" + userId;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterUserResponseDTO.class).getBody();
     }
 
-    public ResponseEntity<TwitterResponseDTO> getTweetsAndRetweetsForUserIdInLast(String userId, String timeframe) {
+    public ResponseEntity<TwitterResponseDTO> getTweetsAndRetweetsForUserIdInLast(final String userId, final String timeframe) {
         LOG.info("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=replies&max_results=5&start_time=" + timeframe;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
-    public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(String userId) {
+    public ResponseEntity<TwitterResponseDTO> getTweetsForUserId(final String userId) {
         LOG.info("Checking for tweets...");
         String url = "https://api.twitter.com/2/users/" + userId + " /tweets?max_results=5";
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
-    public ResponseEntity<TwitterResponseDTO> getTweetsForUserIdInLast(String userId, String timeframe) {
+    public ResponseEntity<TwitterResponseDTO> getTweetsForUserIdInLast(final String userId, final String timeframe) {
         LOG.info("Checking for tweets...");
         var url = "https://api.twitter.com/2/users/" + userId + " /tweets?exclude=retweets,replies&max_results=5&start_time=" + timeframe;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
-    public ResponseEntity<TwitterResponseDTO> getMentionsForUserIdInLast(String userId, String timeframe) {
+    public ResponseEntity<TwitterResponseDTO> getMentionsForUserIdInLast(final String userId, final String timeframe) {
         LOG.info("Getting mentions for user " + userId + "...");
         var url = "https://api.twitter.com/2/users/" + userId + " /mentions?expansions=author_id&user.fields=username&start_time=" + timeframe;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
-    public ResponseEntity<DataDTO> showUser(String screenName) {
+    public ResponseEntity<DataDTO> showUser(final String screenName) {
         LOG.info("Getting " + screenName + "...");
         String url = "https://api.twitter.com/1.1/users/show.json?screen_name=" + screenName;
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), DataDTO.class);
     }
 
-    public void tweet(String tweet, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret) {
+    public void tweet(final String tweet, final String apiKey, final String apiKeySecret, final String accessToken, final String accessTokenSecret) {
         String encodedTweet = URLEncoder.encode(tweet, Charset.defaultCharset()).substring(0, Math.min(tweet.length(), 279));
         String url = "https://api.twitter.com/1.1/statuses/update.json?status=" + encodedTweet;
         String failureMessage = "Error trying to tweet: \"" + tweet + "\".";
@@ -165,7 +165,7 @@ public class TwitterService {
         post(url, null, failureMessage, apiKey, apiKeySecret, accessToken, accessTokenSecret, tweet);
     }
 
-    public TweetResponseDTO tweet(String tweet, String inReplyTo) {
+    public TweetResponseDTO tweet(final String tweet, String inReplyTo) {
         if (tweet == null) {
             return null;
         }
@@ -181,7 +181,7 @@ public class TwitterService {
             if (inReplyTo != null) {
                 try {
                     Thread.sleep(1000);
-                } catch (InterruptedException e) {}
+                } catch (InterruptedException e) { }
                 url += "&in_reply_to_status_id=" + inReplyTo;
             }
             String successMessage = "Tweeted: \"" + encodedTweet + "\".";
@@ -192,11 +192,11 @@ public class TwitterService {
         }
     }
 
-    public TweetResponseDTO tweet(String tweet) {
+    public TweetResponseDTO tweet(final String tweet) {
         return tweet(tweet, null);
     }
 
-    public void unfollow(DataDTO user) {
+    public void unfollow(final DataDTO user) {
         LOG.info("Unfollowing " + user.getScreenName() + "...");
         String url = "https://api.twitter.com/1.1/friendships/destroy.json?user_id=" + user.getId();
         String failureMessage = "Error trying to unfollow: \"" + user.getScreenName() + "\".";
@@ -209,7 +209,7 @@ public class TwitterService {
         post(url, successMessage, failureMessage, creds.getApiKey(), creds.getApiKeySecret(), creds.getAccessToken(), creds.getAccessTokenSecret(), null);
     }
 
-    private void followUser(String userId) {
+    private void followUser(final String userId) {
         LOG.info("Attempting to follow user with id: " + userId);
         String url = "https://api.twitter.com/1.1/friendships/create.json?user_id=" + userId;
         String successMessage = "Successfully followed user with id: " + userId;
@@ -228,7 +228,7 @@ public class TwitterService {
         return environment.getActiveProfiles().length > 0 && environment.getActiveProfiles()[0].equals("local");
     }
 
-    private TweetResponseDTO post(String url, String successMessage, String failureMessage, String apiKey, String apiKeySecret, String accessToken, String accessTokenSecret, String tweet) {
+    private TweetResponseDTO post(final String url, final String successMessage, final String failureMessage, final String apiKey, final String apiKeySecret, final String accessToken, final String accessTokenSecret, final String tweet) {
         try {
             OAuthConsumer oAuthConsumer = new CommonsHttpOAuthConsumer(apiKey, apiKeySecret);
             oAuthConsumer.setTokenWithSecret(accessToken, accessTokenSecret);

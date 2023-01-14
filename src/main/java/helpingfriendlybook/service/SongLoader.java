@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class SongLoader {
+public final class SongLoader {
     private static final Logger LOG = LoggerFactory.getLogger(SongLoader.class);
 
     private static final String PHISH_NET_URL = "https://www.phish.net";
@@ -22,9 +22,9 @@ public class SongLoader {
 
     private final PhishDotNetProxyService phishDotNetProxyService;
 
-    public SongLoader(PhishDotNetProxyService phishDotNetProxyService, GoogliTweeter googliTweeter) {
-        this.phishDotNetProxyService = phishDotNetProxyService;
-        this.googliTweeter = googliTweeter;
+    public SongLoader(final PhishDotNetProxyService proxyService, final GoogliTweeter googli) {
+        this.phishDotNetProxyService = proxyService;
+        this.googliTweeter = googli;
     }
 
     public List<SongDTO> getSongs() {

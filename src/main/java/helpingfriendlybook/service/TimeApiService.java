@@ -12,8 +12,8 @@ public class TimeApiService {
 
     private final RestTemplate restTemplate;
 
-    public TimeApiService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public TimeApiService(final RestTemplate template) {
+        this.restTemplate = template;
     }
 
     public String getTimeInNewYork() {

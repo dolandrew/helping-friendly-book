@@ -11,7 +11,7 @@ import java.util.Date;
 
 @EnableScheduling
 @Service
-public class Follower {
+public final class Follower {
     private final GoogliTweeter googliTweeter;
 
     private final TwitterService twitterService;
@@ -22,9 +22,9 @@ public class Follower {
     @Value("${twitter.followed.user.tweets}")
     private Integer followedUserTweets;
 
-    public Follower(GoogliTweeter googliTweeter, TwitterService twitterService) {
-        this.googliTweeter = googliTweeter;
-        this.twitterService = twitterService;
+    public Follower(final GoogliTweeter googli, final TwitterService ts) {
+        this.googliTweeter = googli;
+        this.twitterService = ts;
     }
 
     @Scheduled(cron = "${cron.follow}")

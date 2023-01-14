@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verify;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ExtendWith(SpringExtension.class)
-public class OnThisDayServiceIntegrationTest {
+public final class OnThisDayServiceIntegrationTest {
 
     @LocalServerPort
     private int serverPort;

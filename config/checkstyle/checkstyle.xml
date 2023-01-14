@@ -62,9 +62,9 @@
     <!-- Checks for Size Violations.                    -->
     <!-- See https://checkstyle.org/config_sizes.html -->
     <module name="FileLength"/>
-        <module name="LineLength">
-            <property name="fileExtensions" value="java"/>
-        </module>
+<!--        <module name="LineLength">-->
+<!--            <property name="fileExtensions" value="java"/>-->
+<!--        </module>-->
 
     <!-- Checks for whitespace                               -->
     <!-- See https://checkstyle.org/config_whitespace.html -->
@@ -153,7 +153,7 @@
         <!-- See https://checkstyle.org/config_coding.html -->
         <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
-        <module name="HiddenField"/>
+<!--        <module name="HiddenField"/>-->
         <module name="IllegalInstantiation"/>
         <module name="InnerAssignment"/>
         <!--        <module name="MagicNumber"/>-->

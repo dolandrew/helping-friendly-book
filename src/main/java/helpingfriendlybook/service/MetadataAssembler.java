@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import static helpingfriendlybook.service.PhishDotNetProxyService.getVenueOfShow;
 
 @Service
-public class MetadataAssembler {
+public final class MetadataAssembler {
     private static final Logger LOG = LoggerFactory.getLogger(MetadataAssembler.class);
 
     private final GoogliTweeter googliTweeter;
@@ -21,13 +21,14 @@ public class MetadataAssembler {
 
     private final SongLoader songLoader;
 
-    public MetadataAssembler(SongLoader songLoader, GoogliTweeter googliTweeter, PhishDotNetProxyService phishDotNetProxyService) {
-        this.songLoader = songLoader;
-        this.googliTweeter = googliTweeter;
-        this.phishDotNetProxyService = phishDotNetProxyService;
+    public MetadataAssembler(final SongLoader loader, final GoogliTweeter googli,
+                             final PhishDotNetProxyService proxyService) {
+        this.songLoader = loader;
+        this.googliTweeter = googli;
+        this.phishDotNetProxyService = proxyService;
     }
 
-    public SongDTO assembleMetadata(String songName) {
+    public SongDTO assembleMetadata(final String songName) {
         String cleanedSongName = songName.replaceAll("\\(|\\)|,", "");
         if (cleanedSongName.equals("Old Home Place")) {
             cleanedSongName = "The Old Home Place";
@@ -67,7 +68,7 @@ public class MetadataAssembler {
         return songDTO;
     }
 
-    private String getVenue(String date) {
+    private String getVenue(final String date) {
         String[] dateParts = date.split("-");
         List<Element> shows = phishDotNetProxyService.getShowsForDate(Integer.valueOf(dateParts[2]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[0]));
         return getVenueOfShow(shows.get(0));

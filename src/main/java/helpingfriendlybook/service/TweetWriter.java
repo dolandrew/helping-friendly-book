@@ -6,24 +6,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
-
 @Service
 public class TweetWriter {
     private static final Logger LOG = LoggerFactory.getLogger(TweetWriter.class);
 
     @Value("${custom.hashtags}")
-    private String customHashtags;
+    private static String customHashtags;
 
-    public String addShowReplyHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishcompanion #" + System.currentTimeMillis()/1000000;
-    }
-
-    public String addSongHashtags(String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion " + customHashtags;
-    }
-
-    public String writeSongStatsTweet(SongDTO songDTO, Integer bustoutThreshold) {
+    public static String writeSongStatsTweet(final SongDTO songDTO, final Integer bustoutThreshold) {
         if (songDTO == null) {
             return null;
         }
@@ -32,11 +22,11 @@ public class TweetWriter {
         if (songDTO.getTimes() == 0) {
             tweet = songDTO.getName();
         } else {
-            tweet += toCardinalNumber(songDTO.getTimes() + 1) + " " + songDTO.getName() +
-                    "\nLast played: " + songDTO.getLastPlayed() +
-                    "\nGap: " + songDTO.getGap() +
-                    "\nFirst played: " + songDTO.getDebut() +
-                    "\n" + songDTO.getLink();
+            tweet += toCardinalNumber(songDTO.getTimes() + 1) + " " + songDTO.getName()
+                    + "\nLast played: " + songDTO.getLastPlayed()
+                    + "\nGap: " + songDTO.getGap()
+                    + "\nFirst played: " + songDTO.getDebut()
+                    + "\n" + songDTO.getLink();
         }
 
         String tweetWithHashtags = addSongHashtags(tweet);
@@ -48,7 +38,11 @@ public class TweetWriter {
         return tweetWithHashtags;
     }
 
-    private String toCardinalNumber(int times) {
+    private static String addSongHashtags(final String tweet) {
+        return tweet + "\n\n#phish #phishstats #phishcompanion " + customHashtags;
+    }
+
+    private static String toCardinalNumber(final int times) {
         if (("" + times).endsWith("11")) {
             return times + "th";
         }
