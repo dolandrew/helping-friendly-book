@@ -39,7 +39,7 @@ public class TweetWriter {
     }
 
     private static String addSongHashtags(final String tweet) {
-        return tweet + "\n\n#phish #phishstats #phishcompanion " + customHashtags;
+        return tweet + "\n\n#phish #phishstats #phishcompanion ";
     }
 
     private static String toCardinalNumber(final int times) {
