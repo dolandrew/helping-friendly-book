@@ -52,11 +52,6 @@ jacocoTestReport {
     }
 }
 
-jar {
-     baseName = 'helpingfriendlybook'
-     version =  '2.0.0'
- }
-
 javadoc {
      source = sourceSets.main.allJava
      options {
