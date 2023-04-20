@@ -62,7 +62,7 @@ public final class SongStatsServiceIntegrationTest {
         doReturn(getShowsFromResponse(show1)).doReturn(getShowsFromResponse(show2))
                 .when(phishDotNetProxyService).getShowsForDate(anyInt(), anyInt(), anyInt());
 
-        doReturn("9:35").when(timeApiService).getTimeInLosAngeles();
+        doReturn("9:35").when(timeApiService).getTimeAtShow();
     }
 
     @Test

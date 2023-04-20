@@ -42,6 +42,9 @@ public final class SongStatsService {
     @Value("${twitter.phish.ftr.id}")
     private String phishFTRid;
 
+    @Value("${show.timezone.abbr}")
+    private String showTimezoneAbbr;
+
     public SongStatsService(final MetadataAssembler assembler, final TweetWriter tw, final GoogliTweeter googli,
                             final TwitterService ts, final TimeApiService tApiService) {
         this.metadataAssembler = assembler;
@@ -154,12 +157,12 @@ public final class SongStatsService {
     }
 
     private void tweetSetStart(final String setName, final String emoji) {
-        String timeInLosAngeles = timeApiService.getTimeInLosAngeles();
+        String timeInLosAngeles = timeApiService.getTimeAtShow();
         String[] timeParts = timeInLosAngeles.split(":");
         int hour = parseInt(timeParts[0]) % 12;
         if (hour == 0) {
             hour = 12;
         }
-        twitterService.tweet(emoji + " " + setName + " started at " + hour + ":" + timeParts[1] + (parseInt(timeParts[0]) >= 12 ? " PM" : " AM") + " PT");
+        twitterService.tweet(emoji + " " + setName + " started at " + hour + ":" + timeParts[1] + (parseInt(timeParts[0]) >= 12 ? " PM " : " AM ") + showTimezoneAbbr);
     }
 }
