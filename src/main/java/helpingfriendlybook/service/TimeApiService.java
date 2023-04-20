@@ -16,8 +16,8 @@ public class TimeApiService {
         this.restTemplate = template;
     }
 
-    public String getTimeInNewYork() {
-        LOG.warn("Getting current time in New York...");
-        return restTemplate.getForObject("https://www.timeapi.io/api/Time/current/zone?timeZone=America/New_York", TimeDTO.class).getTime();
+    public String getTimeInLosAngeles() {
+        LOG.warn("Getting current time in Los Angeles...");
+        return restTemplate.getForObject("https://www.timeapi.io/api/Time/current/zone?timeZone=America/Los_Angeles", TimeDTO.class).getTime();
     }
 }

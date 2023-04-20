@@ -39,7 +39,7 @@ public final class OnThisDayService {
 
     @Scheduled(cron = "${cron.shows}")
     public void tweetOnThisDayOrRandomShow() {
-        boolean alwaysRandom = false;
+        boolean alwaysRandom = false; // for testing
         try {
             ZonedDateTime today = OffsetDateTime.now().atZoneSameInstant(ZoneId.of("America/Los_Angeles"));
             List<Element> shows = phishDotNetProxyService.getShowsForDate(today.getDayOfMonth(), today.getMonthValue(), null);

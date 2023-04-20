@@ -154,12 +154,12 @@ public final class SongStatsService {
     }
 
     private void tweetSetStart(final String setName, final String emoji) {
-        String timeInNewYork = timeApiService.getTimeInNewYork();
-        String[] timeParts = timeInNewYork.split(":");
+        String timeInLosAngeles = timeApiService.getTimeInLosAngeles();
+        String[] timeParts = timeInLosAngeles.split(":");
         int hour = parseInt(timeParts[0]) % 12;
         if (hour == 0) {
             hour = 12;
         }
-        twitterService.tweet(emoji + " " + setName + " started at " + hour + ":" + timeParts[1] + (parseInt(timeParts[0]) >= 12 ? " PM" : " AM") + " ET");
+        twitterService.tweet(emoji + " " + setName + " started at " + hour + ":" + timeParts[1] + (parseInt(timeParts[0]) >= 12 ? " PM" : " AM") + " PT");
     }
 }
