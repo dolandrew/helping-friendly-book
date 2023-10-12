@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpMethod.GET;
 
@@ -47,6 +49,25 @@ public class PhishDotNetProxyService {
         LOG.info("HFB found " + shows.size() + " shows on " + (year != null ? year + "-" : "") + month + "-" + day + ".");
         return shows;
     }
+
+    public String getLastPlayedSongForDate(final Integer day,
+                                          final Integer month,
+                                      final Integer year) {
+        LOG.info("Looking for setlist on " + month + "-" + day + "...");
+        String url = "https://phish.net/setlists/?month=" + month + "&day=" + day + (year != null ? "&year=" + year : "");
+        ResponseEntity<String> response = restTemplate.exchange(url, GET, null,
+                String.class);
+        List<Element> shows =  getShowsFromResponse(response.getBody());
+        LOG.info("HFB found " + shows.size() + " shows on " + (year != null ? year + "-" : "") + month + "-" + day + ".");
+        Element setlistBody = shows.get(0).getElementsByClass("setlist-body").get(0);
+        List<Element> sets = setlistBody.getElementsByClass("set-label");
+        List<String> songs =
+                Objects.requireNonNull(sets.get(sets.size()-1).parent().getElementsByClass("setlist-song")).stream().map(element -> element.wholeText()).collect(Collectors.toList());
+
+        return songs.get(songs.size()-1);
+    }
+
+
 
     public Element getRandomShow() {
         String url = "https://phish.net/setlists/jump/random";

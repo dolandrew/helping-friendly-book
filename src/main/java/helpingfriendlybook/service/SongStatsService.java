@@ -11,9 +11,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Locale;
 
-import static helpingfriendlybook.service.TwitterService.getOneMinuteAgo;
 import static java.lang.Integer.parseInt;
 
 @EnableScheduling
@@ -31,6 +31,8 @@ public final class SongStatsService {
 
     private final TwitterService twitterService;
 
+    private final PhishDotNetProxyService phishDotNetProxyService;
+
     @Value("${bustout.threshold}")
     private Integer bustoutThreshold;
 
@@ -46,12 +48,13 @@ public final class SongStatsService {
     private String showTimezoneAbbr;
 
     public SongStatsService(final MetadataAssembler assembler, final TweetWriter tw, final GoogliTweeter googli,
-                            final TwitterService ts, final TimeApiService tApiService) {
+                            final TwitterService ts, final TimeApiService tApiService, final PhishDotNetProxyService phishDotNetProxyService) {
         this.metadataAssembler = assembler;
         this.tweetWriter = tw;
         this.googliTweeter = googli;
         this.twitterService = ts;
         this.timeApiService = tApiService;
+        this.phishDotNetProxyService = phishDotNetProxyService;
     }
 
     public static String cleanSongName(final String fetchedSongName) {
@@ -70,10 +73,10 @@ public final class SongStatsService {
     }
 
     @Scheduled(cron = "${cron.listen}")
-    public void listenToPhishFTR() {
+    public void listenToPhishDotNet() {
         try {
-            var tweets = twitterService.getTweetsForUserIdInLast(phishFTRid, getOneMinuteAgo());
-            String songName = processIncomingTweet(tweets);
+            final LocalDate today = LocalDate.now();
+            String songName = phishDotNetProxyService.getLastPlayedSongForDate(today.getDayOfMonth(), today.getMonthValue(), today.getYear() );
             if (songName != null) {
                 if (songName.equals(ignoredSong)) {
                     googliTweeter.tweet("Ignored expected song: " + ignoredSong);
