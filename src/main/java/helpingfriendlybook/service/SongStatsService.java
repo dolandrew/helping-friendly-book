@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Locale;
 
 import static java.lang.Integer.parseInt;
@@ -75,7 +76,7 @@ public final class SongStatsService {
     @Scheduled(cron = "${cron.listen}")
     public void listenToPhishDotNet() {
         try {
-            final LocalDate today = LocalDate.now();
+            final LocalDate today = LocalDate.now(ZoneId.of("UTC-8"));
             String songName = phishDotNetProxyService.getLastPlayedSongForDate(today.getDayOfMonth(), today.getMonthValue(), today.getYear() );
             if (songName != null) {
                 if (songName.equals(ignoredSong)) {
