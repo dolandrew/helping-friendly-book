@@ -145,6 +145,21 @@ public class TwitterService {
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeadersWithBearerToken()), TwitterResponseDTO.class);
     }
 
+//    public String getTimelineForUsername(final String username) {
+//        LOG.info("Checking for tweets...");
+//        var url = "https://twitter.com/" + username;
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add("Accept-Encoding", "*/*");
+//        HttpEntity httpEntity = new HttpEntity(headers);
+//        ResponseEntity<String> response =  restTemplate.exchange(url,
+//                HttpMethod.GET, httpEntity,
+//                String.class);
+//        Document doc = Jsoup.parse(response.getBody());
+//        doc.getElementsByAttributeValue("data-testid", "tweetText");
+//        return "";
+//
+//    }
+
     public ResponseEntity<TwitterResponseDTO> getMentionsForUserIdInLast(final String userId, final String timeframe) {
         LOG.info("Getting mentions for user " + userId + "...");
         var url = "https://api.twitter.com/2/users/" + userId + " /mentions?expansions=author_id&user.fields=username&start_time=" + timeframe;
